@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/geral :: head}"></head>
+
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+    <nav th:replace="~{fragments/geral :: navbar}"></nav>
+    <aside th:replace="~{fragments/geral :: sidebar}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Histórico do Cliente</h1>
+                    </div>
+                    <div class="col-sm-6 text-right">
+                        <a href="/clientes" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <div class="card card-widget widget-user-2">
+                    <div class="widget-user-header bg-info">
+                        <div class="widget-user-image">
+                            <img class="img-circle elevation-2"
+                                 th:src="'https://ui-avatars.com/api/?name=' + ${cliente.nomeEmpresa} + '&background=fff&color=17a2b8'"
+                                 alt="User Avatar">
+                        </div>
+                        <h3 class="widget-user-username" th:text="${cliente.nomeEmpresa}">Nome da Empresa</h3>
+                        <h5 class="widget-user-desc" th:text="${cliente.nomeResponsavel}">Nome do Dono</h5>
+                    </div>
+                    <div class="card-footer p-0">
+                        <ul class="nav flex-column">
+
+                            <li class="nav-item">
+                                <div class="nav-link d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-id-card mr-2 text-secondary"></i> CPF / CNPJ</span>
+                                    <span class="badge bg-secondary mask-cpf-cnpj" th:text="${cliente.cnpj}">00.000.000/0000-00</span>
+                                </div>
+                            </li>
+
+                            <li class="nav-item">
+                                <div class="nav-link d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-envelope mr-2 text-primary"></i> E-mail</span>
+                                    <div>
+                                        <span class="badge bg-primary" id="copy-email" th:text="${cliente.email}">email@teste.com</span>
+                                        <button class="btn btn-xs btn-outline-primary ml-1" onclick="copiarTexto('copy-email')" title="Copiar E-mail">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="nav-item">
+                                <div class="nav-link d-flex justify-content-between align-items-center">
+                                    <span><i class="fab fa-whatsapp mr-2 text-success"></i> Telefone / Zap</span>
+                                    <div>
+                                        <span class="badge bg-success mask-telefone" id="copy-tel" th:text="${cliente.telefone}">(00) 00000-0000</span>
+                                        <button class="btn btn-xs btn-outline-success ml-1" onclick="copiarTexto('copy-tel')" title="Copiar Telefone">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header border-0">
+                        <h3 class="card-title">Faturas e Cobranças</h3>
+                    </div>
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-striped table-valign-middle">
+                            <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Vencimento</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ação</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(titulos)}">
+                                <td colspan="5" class="text-center">Nenhuma cobrança registrada para este cliente.</td>
+                            </tr>
+
+                            <tr th:each="titulo : ${titulos}">
+                                <td th:text="${titulo.descricao}">Site</td>
+                                <td th:text="${#temporals.format(titulo.dataVencimento, 'dd/MM/yyyy')}">10/02/2026</td>
+                                <td th:text="'R$ ' + ${#numbers.formatDecimal(titulo.valorOriginal, 1, 'POINT', 2, 'COMMA')}">R$ 500,00</td>
+                                <td>
+                                    <span th:if="${titulo.status.name() == 'PENDENTE'}" class="badge bg-warning">Pendente</span>
+                                    <span th:if="${titulo.status.name() == 'PAGO'}" class="badge bg-success">Pago</span>
+                                </td>
+                                <td>
+                                    <a th:if="${titulo.status.name() == 'PENDENTE'}"
+                                       th:href="@{/titulos/pagar/{id}(id=${titulo.id})}"
+                                       class="text-success" title="Dar Baixa"
+                                       onclick="return confirm('Confirmar pagamento?');">
+                                        <i class="fas fa-check-circle"></i> Pagar
+                                    </a>
+                                    <span th:if="${titulo.status.name() == 'PAGO'}" class="text-muted">
+                                        <i class="fas fa-check"></i> Concluído
+                                    </span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{fragments/geral :: footer}"></footer>
+</div>
+<div th:replace="~{fragments/geral :: scripts}"></div>
+
+<script th:inline="none">
+    // Função para o Botão de Copiar
+    function copiarTexto(idElemento) {
+        // Pega o texto de dentro do badge
+        var texto = document.getElementById(idElemento).innerText;
+
+        // Joga pra área de transferência (Ctrl+C)
+        navigator.clipboard.writeText(texto).then(function() {
+            // Um alerta visual rápido pra avisar que copiou
+            alert("Copiado com sucesso: " + texto);
+        }).catch(function(err) {
+            console.error('Erro ao copiar: ', err);
+        });
+    }
+</script>
+</body>
+</html>

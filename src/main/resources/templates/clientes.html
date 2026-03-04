@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/geral :: head}"></head>
+
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+    <nav th:replace="~{fragments/geral :: navbar}"></nav>
+    <aside th:replace="~{fragments/geral :: sidebar}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2 align-items-center">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">Meus Clientes</h1>
+                    </div>
+                    <div class="col-sm-6 text-right">
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal-novo-cliente">
+                            <i class="fas fa-plus"></i> Novo Cliente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-ban"></i> Ops!</h5>
+                    <span th:text="${mensagemErro}"></span>
+                </div>
+
+                <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-check"></i> Sucesso!</h5>
+                    <span th:text="${mensagemSucesso}"></span>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <table id="tabela-clientes" class="table table-bordered table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Empresa</th>
+                                <th>Responsável</th>
+                                <th>E-mail</th>
+                                <th>Telefone</th>
+                                <th>Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="cliente : ${clientes}">
+                                <td th:text="${cliente.id}">1</td>
+                                <td th:text="${cliente.nomeEmpresa}">Gwoth</td>
+                                <td th:text="${cliente.nomeResponsavel}">Cariani</td>
+                                <td th:text="${cliente.email}">email@teste.com</td>
+                                <td th:text="${cliente.telefone}">9999-9999</td>
+                                <td>
+                                    <a th:href="@{/clientes/{id}/detalhes(id=${cliente.id})}"
+                                       class="btn btn-sm btn-primary"
+                                       title="Ver Histórico Financeiro">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+
+                                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                                            data-target="#modal-editar-cliente"
+                                            th:data-id="${cliente.id}"
+                                            th:data-nome="${cliente.nomeEmpresa}"
+                                            th:data-responsavel="${cliente.nomeResponsavel}"
+                                            th:data-cpf="${cliente.cnpj}"
+                                            th:data-telefone="${cliente.telefone}"
+                                            th:data-email="${cliente.email}">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+
+                                    <a th:href="@{/clientes/excluir/{id}(id=${cliente.id})}"
+                                       class="btn btn-sm btn-danger"
+                                       title="Excluir"
+                                       onclick="return confirm('Tem certeza? Isso apaga o cliente para sempre.');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="~{fragments/geral :: footer}"></footer>
+</div>
+
+<div class="modal fade" id="modal-novo-cliente">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/clientes/salvar" method="post">
+                <div class="modal-header">
+                    <h4 class="modal-title">Novo Cliente</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label>Nome da Empresa / Fantasia</label>
+                        <input type="text" name="nomeEmpresa" class="form-control" placeholder="Ex: Growth Supplements" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nome do Responsável</label>
+                        <input type="text" name="nomeResponsavel" class="form-control" placeholder="Ex: Carlos Roberto" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>CPF ou CNPJ</label>
+                        <input type="text" name="cnpj" class="form-control mask-cpf-cnpj" placeholder="Ex: 000.000.000-00 ou 00.000.000/0001-00">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>WhatsApp / Telefone</label>
+                                <input type="text" name="telefone" class="form-control mask-telefone" placeholder="Ex: (21) 99999-9999">
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>E-mail</label>
+                                <input type="email" name="email" class="form-control" placeholder="Ex: contato@empresa.com.br">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Salvar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-editar-cliente">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/clientes/salvar" method="post">
+                <div class="modal-header bg-info">
+                    <h4 class="modal-title">Editar Cliente</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+
+                    <input type="hidden" id="edit-id" name="id">
+
+                    <div class="form-group">
+                        <label>Nome da Empresa / Fantasia</label>
+                        <input type="text" id="edit-nome" name="nomeEmpresa" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nome do Responsável</label>
+                        <input type="text" id="edit-responsavel" name="nomeResponsavel" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>CPF ou CNPJ</label>
+                        <input type="text" id="edit-cpf" name="cnpj" class="form-control mask-cpf-cnpj">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>WhatsApp / Telefone</label>
+                                <input type="text" id="edit-telefone" name="telefone" class="form-control mask-telefone">
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>E-mail</label>
+                                <input type="email" id="edit-email" name="email" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/geral :: scripts}"></div>
+
+<script th:inline="none">
+    $(function () {
+        // Inicializa a tabela
+        $("#tabela-clientes").DataTable({
+            "responsive": true, "lengthChange": false, "autoWidth": false,
+            "language": { "search": "Pesquisar:", "paginate": { "previous": "Anterior", "next": "Próximo" }, "emptyTable": "Nenhum cliente cadastrado", "info": "Mostrando _START_ até _END_ de _TOTAL_ clientes" },
+            "columnDefs": [ { "orderable": false, "targets": [4, 5] } ]
+        });
+
+        // LÓGICA DO MODAL EDITAR (Preenche os campos)
+        $('#modal-editar-cliente').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+
+            modal.find('#edit-id').val(button.data('id'));
+            modal.find('#edit-nome').val(button.data('nome'));
+            modal.find('#edit-responsavel').val(button.data('responsavel'));
+            modal.find('#edit-cpf').val(button.data('cpf')).trigger('input'); // o trigger avisa a máscara pra rodar
+            modal.find('#edit-telefone').val(button.data('telefone')).trigger('input');
+            modal.find('#edit-email').val(button.data('email'));
+        });
+    });
+</script>
+
+<script th:if="${modalAberto}">
+    $(function() {
+        $('#modal-novo-cliente').modal('show');
+    });
+</script>
+</body>
+</html>

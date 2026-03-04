@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/geral :: head}"></head>
+
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+    <nav th:replace="~{fragments/geral :: navbar}"></nav>
+    <aside th:replace="~{fragments/geral :: sidebar}"></aside>
+
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6"><h1 class="m-0">Visão Geral</h1></div>
+                </div>
+            </div>
+        </div>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3 th:text="${qtdClientes}">0</h3>
+                                <p>Clientes Cadastrados</p>
+                            </div>
+                            <div class="icon"><i class="fas fa-users"></i></div>
+                            <a href="/clientes" class="small-box-footer">Ver todos <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-success">
+                            <div class="inner">
+                                <h3 th:text="${totalPago != null} ? 'R$ ' + ${#numbers.formatDecimal(totalPago, 1, 'POINT', 2, 'COMMA')} : 'R$ 0,00'">R$ 0,00</h3>
+                                <p>Receita Confirmada</p>
+                            </div>
+                            <div class="icon"><i class="fas fa-wallet"></i></div>
+                            <a href="/titulos?filtro=pagos" class="small-box-footer">Ver Detalhes <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-warning">
+                            <div class="inner">
+                                <h3 th:text="${totalPendente != null} ? 'R$ ' + ${#numbers.formatDecimal(totalPendente, 1, 'POINT', 2, 'COMMA')} : 'R$ 0,00'">R$ 0,00</h3>
+                                <p>A Receber (Pendente)</p>
+                            </div>
+                            <div class="icon"><i class="fas fa-clock"></i></div>
+                            <a href="/titulos?filtro=pendentes" class="small-box-footer">Ver Detalhes <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-danger">
+                            <div class="inner">
+                                <h3 th:text="${qtdVencidos}">0</h3>
+                                <p>Cobranças Vencidas</p>
+                            </div>
+                            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <a href="/titulos?filtro=vencidos" class="small-box-footer">Resolver Agora <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="~{fragments/geral :: footer}"></footer>
+</div>
+<div th:replace="~{fragments/geral :: scripts}"></div>
+</body>
+</html>

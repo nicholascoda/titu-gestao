@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/geral :: head}"></head>
+
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+    <nav th:replace="~{fragments/geral :: navbar}"></nav>
+    <aside th:replace="~{fragments/geral :: sidebar}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1>Central de Ajuda</h1>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card card-primary card-outline">
+                            <div class="card-body box-profile">
+                                <div class="text-center">
+                                    <img class="profile-user-img img-fluid img-circle"
+                                         src="https://ui-avatars.com/api/?name=Suporte+Titu&background=0D8ABC&color=fff"
+                                         alt="User profile picture">
+                                </div>
+
+                                <h3 class="profile-username text-center">Suporte Titu System</h3>
+                                <p class="text-muted text-center">Desenvolvedor Full Stack</p>
+
+                                <ul class="list-group list-group-unbordered mb-3">
+                                    <li class="list-group-item">
+                                        <b>Email</b> <a class="float-right">suporte@titu.com.br</a>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <b>WhatsApp</b> <a class="float-right">(21) 99999-9999</a>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <b>Horário</b> <a class="float-right">09:00 - 18:00</a>
+                                    </li>
+                                </ul>
+
+                                <a href="#" class="btn btn-primary btn-block"><b>Abrir Chamado (WhatsApp)</b></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Dúvidas Comuns</h3>
+                            </div>
+                            <div class="card-body">
+                                <strong><i class="fas fa-book mr-1"></i> Como alterar a senha?</strong>
+                                <p class="text-muted">Acesse Configurações > Perfil para alterar seus dados.</p>
+                                <hr>
+                                <strong><i class="fas fa-file-invoice-dollar mr-1"></i> O robô cobra fim de semana?</strong>
+                                <p class="text-muted">Sim! O robô não descansa. Ele envia e-mails todos os dias as 08:00.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{fragments/geral :: footer}"></footer>
+</div>
+<div th:replace="~{fragments/geral :: scripts}"></div>
+</body>
+</html>

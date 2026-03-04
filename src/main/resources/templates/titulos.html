@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/geral :: head}"></head>
+
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+    <nav th:replace="~{fragments/geral :: navbar}"></nav>
+    <aside th:replace="~{fragments/geral :: sidebar}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2 align-items-center">
+
+                    <div class="col-sm-8"> <h1 class="m-0 d-inline mr-2">Cobranças</h1>
+
+                        <span th:if="${filtroAtivo == 'pagos'}" class="badge badge-success">Filtro: PAGOS</span>
+                        <span th:if="${filtroAtivo == 'pendentes'}" class="badge badge-warning">Filtro: PENDENTES</span>
+                        <span th:if="${filtroAtivo == 'vencidos'}" class="badge badge-danger">Filtro: VENCIDOS</span>
+
+                        <a th:if="${filtroAtivo != null}" href="/titulos" class="btn btn-xs btn-outline-secondary ml-1" title="Limpar Filtro">
+                            <i class="fas fa-times"></i> Limpar
+                        </a>
+                    </div>
+
+                    <div class="col-sm-4 text-right">
+                        <button class="btn btn-success" data-toggle="modal" data-target="#modal-novo-titulo">
+                            <i class="fas fa-plus"></i> Nova Cobrança
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-check"></i> Sucesso!</h5>
+                    <span th:text="${mensagemSucesso}"></span>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <table id="tabela-titulos" class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Descrição</th>
+                                <th>Cliente</th>
+                                <th>Vencimento</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="titulo : ${titulos}">
+                                <td th:text="${titulo.id}">1</td>
+                                <td th:text="${titulo.descricao}">Site</td>
+                                <td th:text="${titulo.cliente?.nomeEmpresa}">Gwoth</td>
+                                <td th:text="${#temporals.format(titulo.dataVencimento, 'dd/MM/yyyy')}">10/02/2026</td>
+                                <td th:text="'R$ ' + ${#numbers.formatDecimal(titulo.valorOriginal, 1, 'POINT', 2, 'COMMA')}">R$ 1.000,00</td>
+                                <td>
+                                    <span th:if="${titulo.status.name() == 'PENDENTE'}" class="badge bg-warning">Pendente</span>
+                                    <span th:if="${titulo.status.name() == 'PAGO'}" class="badge bg-success">Pago</span>
+                                </td>
+                                <td>
+                                    <a th:if="${titulo.status.name() == 'PENDENTE'}"
+                                       th:href="@{/titulos/pagar/{id}(id=${titulo.id})}"
+                                       class="btn btn-sm btn-success"
+                                       title="Confirmar Pagamento"
+                                       onclick="return confirm('Confirmar o recebimento deste valor?');">
+                                        <i class="fas fa-check"></i>
+                                    </a>
+
+                                    <button type="button" class="btn btn-sm btn-info" title="Editar"
+                                            data-toggle="modal"
+                                            data-target="#modal-editar-titulo"
+                                            th:data-id="${titulo.id}"
+                                            th:data-descricao="${titulo.descricao}"
+                                            th:data-valor="${titulo.valorOriginal}"
+                                            th:data-vencimento="${titulo.dataVencimento}"
+                                            th:data-cliente-id="${titulo.cliente != null ? titulo.cliente.id : ''}"
+                                            th:data-cliente-nome="${titulo.cliente != null ? titulo.cliente.nomeEmpresa : 'Cliente Removido'}">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+
+                                    <a th:href="@{/titulos/excluir/{id}(id=${titulo.id})}"
+                                       class="btn btn-sm btn-danger"
+                                       title="Excluir"
+                                       onclick="return confirm('Tem certeza? Isso apaga o registro para sempre.');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="~{fragments/geral :: footer}"></footer>
+</div>
+
+<div class="modal fade" id="modal-novo-titulo">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/titulos/salvar" method="post">
+                <div class="modal-header">
+                    <h4 class="modal-title">Nova Cobrança</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <select name="clienteId" class="form-control select2" style="width: 100%;" required>
+                            <option value="">Selecione um cliente...</option>
+                            <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nomeEmpresa}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Descrição</label><input type="text" name="descricao" class="form-control" required></div>
+                    <div class="row">
+                        <div class="col-6"><div class="form-group"><label>Valor (R$)</label><input type="number" step="0.01" name="valorOriginal" class="form-control" required></div></div>
+                        <div class="col-6"><div class="form-group"><label>Vencimento</label><input type="date" name="dataVencimento" class="form-control" required></div></div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Lançar Dívida</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-editar-titulo">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/titulos/salvar" method="post">
+                <div class="modal-header bg-info">
+                    <h4 class="modal-title">Editar Cobrança</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+
+                    <input type="hidden" id="edit-id" name="id">
+                    <input type="hidden" id="edit-clienteId" name="clienteId">
+
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <input type="text" id="edit-nomeCliente" class="form-control" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" id="edit-descricao" name="descricao" class="form-control" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>Valor (R$)</label>
+                                <input type="number" step="0.01" id="edit-valor" name="valorOriginal" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>Vencimento</label>
+                                <input type="date" id="edit-vencimento" name="dataVencimento" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/geral :: scripts}"></div>
+
+<script th:inline="none">
+    $(function () {
+        // Inicializa DataTable (Com tradução PT-BR)
+        $("#tabela-titulos").DataTable({
+            "responsive": true,
+            "lengthChange": false,
+            "autoWidth": false,
+            "language": {
+                "search": "Pesquisar:",
+                "paginate": {"previous": "Anterior", "next": "Próximo"},
+                "emptyTable": "Nenhuma cobrança encontrada",
+                "info": "Mostrando _START_ até _END_ de _TOTAL_ registros"
+            },
+            "order": [[3, 'asc']], // Ordena por Vencimento
+            "columnDefs": [{"orderable": false, "targets": 6}] // Trava ordenação na coluna Ações
+        });
+
+        $('.select2').select2({theme: 'bootstrap4', dropdownParent: $('#modal-novo-titulo')});
+
+        // --- PREENCHER O MODAL EDITAR ---
+        $('#modal-editar-titulo').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+
+            var modal = $(this);
+            modal.find('#edit-id').val(button.data('id'));
+            modal.find('#edit-descricao').val(button.data('descricao'));
+            modal.find('#edit-valor').val(button.data('valor'));
+            modal.find('#edit-vencimento').val(button.data('vencimento'));
+            modal.find('#edit-clienteId').val(button.data('cliente-id'));
+            modal.find('#edit-nomeCliente').val(button.data('cliente-nome'));
+        });
+    });
+</script>
+</body>
+</html>
