@@ -13,8 +13,13 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+        }
         .custom-switch-dark {
             display: flex;
             align-items: center;
@@ -60,7 +65,36 @@
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="/" class="nav-link">Dashboard</a>
+            <a href="/" class="nav-link" th:classappend="${currentUri == '/' ? 'font-weight-bold text-primary' : ''}">Dashboard</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="/clientes" class="nav-link" th:classappend="${currentUri != null and currentUri.startsWith('/clientes') ? 'font-weight-bold text-primary' : ''}">Clientes</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="/titulos" class="nav-link" th:classappend="${currentUri != null and currentUri.startsWith('/titulos') ? 'font-weight-bold text-primary' : ''}">Títulos</a>
+        </li>
+    </ul>
+
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link d-flex align-items-center" data-toggle="dropdown" href="#" style="padding-right: 1.5rem;">
+                <i class="fas fa-user-circle mr-2" style="font-size: 1.5rem;"></i>
+                <span class="d-none d-md-inline text-dark">Nicholas</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                <span class="dropdown-item dropdown-header text-left">Logado como: <b>Nicholas</b></span>
+                <div class="dropdown-divider"></div>
+                <a href="/perfil" class="dropdown-item">
+                    <i class="fas fa-id-badge mr-2"></i> Meu Perfil
+                </a>
+                <a href="/configuracoes" class="dropdown-item">
+                    <i class="fas fa-cog mr-2"></i> Configurações
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item text-danger" onclick="if(confirm('Deseja realmente sair?')) alert('Saindo do sistema...');">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Sair do Sistema
+                </a>
+            </div>
         </li>
     </ul>
 </nav>
@@ -102,15 +136,21 @@
             <ul class="nav nav-pills nav-sidebar flex-column">
 
                 <li class="nav-item">
-                    <div class="custom-switch-dark">
-                        <span id="lblDarkMode"><i class="fas fa-moon mr-2"></i> Modo Escuro</span>
-                        <label class="switch">
+                    <a href="#" class="nav-link" onclick="toggleDarkMode(); return false;">
+                        <i class="nav-icon fas fa-moon"></i>
+
+                        <p>
+                            Modo Escuro
+
+                            <span class="right" style="margin-top: -2px;">
+                        <label class="switch mb-0" style="transform: scale(0.7); transform-origin: right center;" onclick="event.stopPropagation();">
                             <input type="checkbox" id="darkModeSwitch" onclick="toggleDarkMode()">
                             <span class="slider"></span>
                         </label>
-                    </div>
+                    </span>
+                        </p>
+                    </a>
                 </li>
-
                 <li class="nav-item">
                     <a href="/configuracoes" class="nav-link" th:classappend="${currentUri != null and currentUri.startsWith('/configuracoes') ? 'active' : ''}">
                         <i class="nav-icon fas fa-cog"></i>

@@ -30,6 +30,7 @@ public class WebController {
     private final TituloService tituloService;
     private final EmailService emailService;
     private final TituloRepository  tituloRepository;
+    private final com.titu.core.repository.LogAcaoRepository logAcaoRepository;
 
     @ModelAttribute("currentUri")
     public String getCurrentUri(HttpServletRequest request) {
@@ -189,7 +190,10 @@ public class WebController {
     }
 
     @GetMapping("/configuracoes")
-    public String configuracoes() {
+    public String configuracoes(Model model) {
+        // Busca todos os logs no banco de dados já ordenados do mais recente pro mais antigo
+        model.addAttribute("logs", logAcaoRepository.findAllByOrderByDataHoraDesc());
+
         return "configuracoes";
     }
 

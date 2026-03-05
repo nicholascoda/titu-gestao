@@ -5,6 +5,7 @@ import com.titu.core.repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.titu.core.service.LogAcaoService;
 
 import java.util.List;
 
@@ -13,9 +14,14 @@ import java.util.List;
 public class ClienteService {
 
     private final ClienteRepository repository;
+    private final LogAcaoService logService;
 
     @Transactional // Garante que ou salva tudo ou não salva nada (Rollback)
     public Cliente salvar(Cliente cliente) {
+
+        // --- 0. DESCOBRIR A AÇÃO (O que resolve o erro vermelho!) ---
+        // Se o ID for null, é um cliente novo. Se já tiver ID, é uma edição.
+        String acao = (cliente.getId() == null) ? "CRIAR" : "EDITAR";
 
         // --- 1. FAXINA (Limpeza de formatação antes de tudo) ---
         if (cliente.getCnpj() != null && !cliente.getCnpj().isBlank()) {
@@ -35,15 +41,21 @@ public class ClienteService {
         }
 
         // Regra 2: Se tiver CNPJ, não pode duplicar também
-        // (Agora ele vai checar usando o número limpo!)
         if (cliente.getCnpj() != null && !cliente.getCnpj().isBlank()) {
             if (repository.existsByCnpj(cliente.getCnpj())) {
                 throw new IllegalArgumentException("Já existe um cliente com este CNPJ.");
             }
         }
 
-        // --- 3. SALVAR ---
-        return repository.save(cliente);
+        // --- 3. SALVAR NO BANCO ---
+        // Salva primeiro e guarda a resposta na variável 'clienteSalvo'
+        Cliente clienteSalvo = repository.save(cliente);
+
+        // --- 4. GRAVAR O LOG (Somente se o salvamento deu certo) ---
+        logService.registrarAcao(acao, "Cliente: " + clienteSalvo.getNomeEmpresa());
+
+        // Retorna o cliente que acabou de ser salvo e logado
+        return clienteSalvo;
     }
 
     public List<Cliente> listarTodos() {
@@ -56,6 +68,12 @@ public class ClienteService {
     }
 
     public void excluir(Long id) {
+        // Pega o nome do cliente antes de apagar para ficar bonito no log
+        Cliente cliente = buscarPorId(id);
+
         repository.deleteById(id);
+
+        // Gravando o Log de exclusão!
+        logService.registrarAcao("EXCLUIR", "Cliente removido: " + cliente.getNomeEmpresa());
     }
 }

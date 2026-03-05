@@ -111,17 +111,23 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <tr>
-                                                <td>05/03/2026 14:30</td>
-                                                <td>Admin</td>
-                                                <td><span class="badge bg-success">PAGAMENTO</span></td>
-                                                <td>Baixa no Título #12 (Growth)</td>
+                                            <tr th:each="log : ${logs}">
+                                                <td th:text="${#temporals.format(log.dataHora, 'dd/MM/yyyy HH:mm')}">05/03/2026 14:30</td>
+
+                                                <td th:text="${log.usuario}">Admin</td>
+
+                                                <td>
+                                                    <span th:if="${log.acao == 'CRIAR'}" class="badge bg-primary">CRIAR</span>
+                                                    <span th:if="${log.acao == 'EDITAR'}" class="badge bg-info">EDITAR</span>
+                                                    <span th:if="${log.acao == 'PAGAMENTO'}" class="badge bg-success">PAGAMENTO</span>
+                                                    <span th:if="${log.acao == 'EXCLUIR'}" class="badge bg-danger">EXCLUIR</span>
+                                                </td>
+
+                                                <td th:text="${log.descricao}">Detalhes da ação</td>
                                             </tr>
-                                            <tr>
-                                                <td>05/03/2026 10:15</td>
-                                                <td>Admin</td>
-                                                <td><span class="badge bg-danger">EXCLUSÃO</span></td>
-                                                <td>Título #8 removido do sistema</td>
+
+                                            <tr th:if="${#lists.isEmpty(logs)}">
+                                                <td colspan="4" class="text-center text-muted">Nenhuma atividade registrada ainda.</td>
                                             </tr>
                                             </tbody>
                                         </table>

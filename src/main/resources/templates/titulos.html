@@ -72,7 +72,8 @@
                                     <span th:if="${titulo.status.name() == 'PENDENTE' and titulo.dataVencimento.isBefore(#temporals.createToday())}"
                                           class="badge bg-danger">Atrasado</span>
                                 </td>
-                                <td>
+                                <td class="text-nowrap">
+
                                     <a th:if="${titulo.status.name() == 'PENDENTE'}"
                                        th:href="@{/titulos/pagar/{id}(id=${titulo.id})}"
                                        class="btn btn-sm btn-success"
@@ -80,6 +81,15 @@
                                        onclick="return confirm('Confirmar o recebimento deste valor?');">
                                         <i class="fas fa-check"></i>
                                     </a>
+
+                                    <button th:if="${titulo.status.name() == 'PAGO'}"
+                                            type="button"
+                                            class="btn btn-sm btn-secondary"
+                                            title="Título já pago"
+                                            disabled
+                                            style="cursor: not-allowed;">
+                                        <i class="fas fa-check"></i>
+                                    </button>
 
                                     <button type="button" class="btn btn-sm btn-info" title="Editar"
                                             data-toggle="modal"
@@ -99,6 +109,7 @@
                                        onclick="return confirm('Tem certeza? Isso apaga o registro para sempre.');">
                                         <i class="fas fa-trash"></i>
                                     </a>
+
                                 </td>
                             </tr>
                             </tbody>

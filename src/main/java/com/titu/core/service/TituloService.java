@@ -7,6 +7,7 @@ import com.titu.core.repository.TituloRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.titu.core.service.LogAcaoService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,45 +18,60 @@ public class TituloService {
 
     private final TituloRepository tituloRepository;
     private final ClienteService clienteService; // Vamos usar o service do cliente pra buscar ele!
+    private final LogAcaoService logService;
 
     @Transactional
     public Titulo salvar(Titulo tituloForm, Long clienteId) {
         Cliente cliente = clienteService.buscarPorId(clienteId);
         Titulo tituloFinal;
 
+        // --- 0. DESCOBRIR A AÇÃO ---
+        // Se já tem ID no formulário, é uma edição. Se não tem, é criação.
+        String acao = (tituloForm.getId() != null) ? "EDITAR" : "CRIAR";
+
         if (tituloForm.getId() != null) {
             // --- ATUALIZAÇÃO (EDITAR) ---
-            // 1. Busca o original no banco (com todas as proteções e versões)
             tituloFinal = tituloRepository.findById(tituloForm.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Título não encontrado"));
 
-            // 2. Atualiza só os dados permitidos
             tituloFinal.setDescricao(tituloForm.getDescricao());
             tituloFinal.setValorOriginal(tituloForm.getValorOriginal());
             tituloFinal.setDataVencimento(tituloForm.getDataVencimento());
-            tituloFinal.setCliente(cliente); // Atualiza o cliente caso tenha mudado
+            tituloFinal.setCliente(cliente);
 
-            // Obs: Não mexemos no status nem na data de pagamento na edição simples
         } else {
             // --- CRIAÇÃO (NOVO) ---
             tituloFinal = tituloForm;
             tituloFinal.setCliente(cliente);
-            tituloFinal.setStatus(StatusTitulo.PENDENTE); // Padrão pra novos
+            tituloFinal.setStatus(StatusTitulo.PENDENTE);
         }
 
-        // Regra de segurança para Status PAGO
         if (tituloFinal.getStatus() == StatusTitulo.PAGO && tituloFinal.getDataPagamento() == null) {
             tituloFinal.setDataPagamento(LocalDate.now());
         }
 
-        return tituloRepository.save(tituloFinal);
+        // --- 1. SALVAR NO BANCO ---
+        Titulo tituloSalvo = tituloRepository.save(tituloFinal);
+
+        // --- 2. GRAVAR O LOG ---
+        logService.registrarAcao(acao, "Cobrança de R$ " + tituloSalvo.getValorOriginal() + " (" + tituloSalvo.getDescricao() + ") para " + cliente.getNomeEmpresa());
+
+        return tituloSalvo;
     }
 
     public List<Titulo> listarTodos() {
         return tituloRepository.findAllComCliente();    }
 
     public void excluir(Long id) {
+        // 1. Busca o título ANTES de apagar, para a gente saber o nome/descrição dele pro Log
+        Titulo titulo = tituloRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Título não encontrado"));
+
+        // 2. Apaga do banco
         tituloRepository.deleteById(id);
+
+        // 3. Grava o Log com a fofoca completa
+        logService.registrarAcao("EXCLUIR", "Cobrança removida: " + titulo.getDescricao() + " (Cliente: " + titulo.getCliente().getNomeEmpresa() + ")");
     }
 
     // Importe o StatusTitulo se precisar
@@ -63,8 +79,11 @@ public class TituloService {
         Titulo titulo = tituloRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Título não encontrado"));
 
-        titulo.setStatus(StatusTitulo.PAGO); // Troca o selo
-        tituloRepository.save(titulo);       // Salva a alteração
+        titulo.setStatus(StatusTitulo.PAGO);
+        tituloRepository.save(titulo);
+
+        // Grava o Log do pagamento
+        logService.registrarAcao("PAGAMENTO", "Baixa confirmada: " + titulo.getDescricao() + " (Cliente: " + titulo.getCliente().getNomeEmpresa() + ")");
     }
 
     public Titulo buscarPorId(Long id) {
