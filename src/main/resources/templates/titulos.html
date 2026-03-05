@@ -64,8 +64,13 @@
                                 <td th:text="${#temporals.format(titulo.dataVencimento, 'dd/MM/yyyy')}">10/02/2026</td>
                                 <td th:text="'R$ ' + ${#numbers.formatDecimal(titulo.valorOriginal, 1, 'POINT', 2, 'COMMA')}">R$ 1.000,00</td>
                                 <td>
-                                    <span th:if="${titulo.status.name() == 'PENDENTE'}" class="badge bg-warning">Pendente</span>
                                     <span th:if="${titulo.status.name() == 'PAGO'}" class="badge bg-success">Pago</span>
+
+                                    <span th:if="${titulo.status.name() == 'PENDENTE' and !titulo.dataVencimento.isBefore(#temporals.createToday())}"
+                                          class="badge bg-warning">Pendente</span>
+
+                                    <span th:if="${titulo.status.name() == 'PENDENTE' and titulo.dataVencimento.isBefore(#temporals.createToday())}"
+                                          class="badge bg-danger">Atrasado</span>
                                 </td>
                                 <td>
                                     <a th:if="${titulo.status.name() == 'PENDENTE'}"

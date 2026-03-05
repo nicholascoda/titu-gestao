@@ -144,10 +144,21 @@ public class WebController {
     }
 
     @GetMapping("/titulos/pagar/{id}")
-    public String darBaixaTitulo(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String darBaixaTitulo(@PathVariable Long id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+
+        // 1. Dá a baixa no banco e prepara a mensagem
         tituloService.darBaixa(id);
         redirectAttributes.addFlashAttribute("mensagemSucesso", "Pagamento confirmado com sucesso!");
-        return "redirect:/titulos";
+
+        // 2. O PULO DO GATO: Pegar a URL exata de onde o clique veio (com os filtros!)
+        String urlAnterior = request.getHeader("Referer");
+
+        // 3. Redirecionar de volta. Se por acaso a URL sumir, ele volta pro padrão.
+        if (urlAnterior != null) {
+            return "redirect:" + urlAnterior;
+        } else {
+            return "redirect:/titulos";
+        }
     }
 
     @GetMapping("/titulos/editar/{id}")
@@ -175,6 +186,11 @@ public class WebController {
         model.addAttribute("titulos", tituloService.listarPorCliente(id));
 
         return "cliente-detalhes"; // Vamos criar esse HTML agora
+    }
+
+    @GetMapping("/configuracoes")
+    public String configuracoes() {
+        return "configuracoes";
     }
 
 }

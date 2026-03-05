@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/geral :: head}"></head>
+
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+    <nav th:replace="~{fragments/geral :: navbar}"></nav>
+    <aside th:replace="~{fragments/geral :: sidebar}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1><i class="fas fa-cog mr-2"></i> Configurações do Sistema</h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <ul class="nav nav-pills flex-column" id="abas-config">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" href="#aba-empresa" data-toggle="tab">
+                                            <i class="fas fa-building mr-2"></i> Minha Empresa
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#aba-automacoes" data-toggle="tab">
+                                            <i class="fas fa-robot mr-2"></i> Automações
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#aba-logs" data-toggle="tab">
+                                            <i class="fas fa-history mr-2"></i> Log de Atividades
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#aba-suporte" data-toggle="tab">
+                                            <i class="fas fa-headset mr-2"></i> Suporte
+                                        </a>
+                                    </li>
+                                    <li class="nav-item mt-3 border-top pt-2">
+                                        <a href="#" class="nav-link text-danger" onclick="if(confirm('Deseja realmente sair?')) alert('Saiu!');">
+                                            <i class="fas fa-sign-out-alt mr-2"></i> Sair
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-9">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="tab-content">
+
+                                    <div class="active tab-pane" id="aba-empresa">
+                                        <h4 class="mb-4">Dados da Sua Empresa</h4>
+                                        <form>
+                                            <div class="form-group">
+                                                <label>Nome Fantasia / Razão Social</label>
+                                                <input type="text" class="form-control" value="Titu Gestão Financeira">
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-group">
+                                                        <label>CNPJ</label>
+                                                        <input type="text" class="form-control" value="00.000.000/0001-00">
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-group">
+                                                        <label>Telefone de Contato</label>
+                                                        <input type="text" class="form-control" value="(21) 99999-9999">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-primary mt-2">Salvar Dados</button>
+                                        </form>
+                                    </div>
+
+                                    <div class="tab-pane" id="aba-automacoes">
+                                        <h4 class="mb-4">Configurações do Robô de Cobrança</h4>
+                                        <div class="custom-control custom-switch mb-3">
+                                            <input type="checkbox" class="custom-control-input" id="switch1" checked>
+                                            <label class="custom-control-label" for="switch1">Enviar e-mail de lembrete 3 dias antes do vencimento</label>
+                                        </div>
+                                        <div class="custom-control custom-switch mb-4">
+                                            <input type="checkbox" class="custom-control-input" id="switch2" checked>
+                                            <label class="custom-control-label" for="switch2">Enviar alerta de título atrasado no dia seguinte ao vencimento</label>
+                                        </div>
+                                        <button type="button" class="btn btn-primary">Salvar Automações</button>
+                                    </div>
+
+                                    <div class="tab-pane" id="aba-logs">
+                                        <h4 class="mb-4">Log de Auditoria</h4>
+                                        <table class="table table-sm table-bordered table-striped">
+                                            <thead>
+                                            <tr>
+                                                <th>Data/Hora</th>
+                                                <th>Usuário</th>
+                                                <th>Ação</th>
+                                                <th>Detalhes</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td>05/03/2026 14:30</td>
+                                                <td>Admin</td>
+                                                <td><span class="badge bg-success">PAGAMENTO</span></td>
+                                                <td>Baixa no Título #12 (Growth)</td>
+                                            </tr>
+                                            <tr>
+                                                <td>05/03/2026 10:15</td>
+                                                <td>Admin</td>
+                                                <td><span class="badge bg-danger">EXCLUSÃO</span></td>
+                                                <td>Título #8 removido do sistema</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="tab-pane" id="aba-suporte">
+                                        <h4 class="mb-4">Suporte Técnico</h4>
+                                        <div class="alert alert-info">
+                                            <h5><i class="icon fas fa-info"></i> Precisa de ajuda?</h5>
+                                            Nossa equipe está pronta para te atender. Escolha um dos canais abaixo:
+                                        </div>
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fab fa-whatsapp text-success mr-2"></i> <strong>WhatsApp:</strong> (21) 99999-9999</li>
+                                            <li class="mb-2"><i class="fas fa-envelope text-primary mr-2"></i> <strong>E-mail:</strong> suporte@titugestao.com.br</li>
+                                            <li class="mb-2"><i class="fas fa-book text-secondary mr-2"></i> <strong>Manual do Usuário:</strong> <a href="#">Clique aqui para ler</a></li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="~{fragments/geral :: footer}"></footer>
+</div>
+
+<div th:replace="~{fragments/geral :: scripts}"></div>
+</body>
+</html>
