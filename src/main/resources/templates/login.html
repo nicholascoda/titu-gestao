@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Titu Gestão | Login</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            background-color: #f4f6f9; /* Fundo cinza bem suave */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .login-box {
+            width: 400px;
+        }
+        .card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Sombra elegante */
+        }
+        .login-logo {
+            font-size: 2.2rem;
+            font-weight: 300;
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .login-logo b {
+            font-weight: 700;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            padding: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-1px); /* Leve pulinho ao passar o mouse */
+        }
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+    </style>
+</head>
+<body class="hold-transition login-page">
+
+<div class="login-box">
+    <div class="login-logo">
+        💰 <b>Titu</b>Gestão
+    </div>
+
+    <div class="card">
+        <div class="card-body login-card-body p-4">
+            <p class="login-box-msg text-muted mb-4 text-center">Faça login para acessar o sistema</p>
+
+            <div th:if="${param.error}" class="alert alert-danger text-center p-2 rounded shadow-sm">
+                <i class="fas fa-exclamation-circle"></i> E-mail ou senha inválidos.
+            </div>
+
+            <div th:if="${param.logout}" class="alert alert-success text-center p-2 rounded shadow-sm">
+                <i class="fas fa-check-circle"></i> Você saiu do sistema com segurança.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="input-group mb-3">
+                    <input type="email" name="username" class="form-control" placeholder="E-mail" required autofocus>
+                    <div class="input-group-append">
+                        <div class="input-group-text bg-white">
+                            <span class="fas fa-envelope text-muted"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group mb-4">
+                    <input type="password" id="senha" name="password" class="form-control" placeholder="Senha" required>
+
+                    <div class="input-group-append" onclick="toggleSenha()" style="cursor: pointer;" title="Mostrar/Ocultar Senha">
+                        <div class="input-group-text bg-white">
+                            <span id="iconeSenha" class="fas fa-eye text-muted"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary btn-block font-weight-bold rounded">
+                            Entrar no Sistema <i class="fas fa-sign-in-alt ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function toggleSenha() {
+        var campoSenha = document.getElementById("senha");
+        var icone = document.getElementById("iconeSenha");
+
+        // Se a senha estiver escondida, a gente mostra e troca pro olho cortado
+        if (campoSenha.type === "password") {
+            campoSenha.type = "text";
+            icone.classList.remove("fa-eye");
+            icone.classList.add("fa-eye-slash");
+        }
+        // Se já estiver aparecendo, a gente esconde e volta pro olho normal
+        else {
+            campoSenha.type = "password";
+            icone.classList.remove("fa-eye-slash");
+            icone.classList.add("fa-eye");
+        }
+    }
+</script>
+</body>
+</html>

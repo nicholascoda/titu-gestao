@@ -197,4 +197,9 @@ public class WebController {
         return "configuracoes";
     }
 
+    @GetMapping("/login")
+    public String login() {
+        return "login"; // Vai chamar o nosso login.html
+    }
+
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head th:replace="~{fragments/geral :: head}"></head>
 
 <body class="hold-transition sidebar-mini">
@@ -63,26 +63,41 @@
 
                                     <div class="active tab-pane" id="aba-empresa">
                                         <h4 class="mb-4">Dados da Sua Empresa</h4>
-                                        <form>
-                                            <div class="form-group">
-                                                <label>Nome Fantasia / Razão Social</label>
-                                                <input type="text" class="form-control" value="Titu Gestão Financeira">
+                                        <form action="/configuracoes/empresa/salvar" method="POST" id="formEmpresa">
+
+                                            <div class="form-group mb-3">
+                                                <input type="text" name="nomeFantasia" id="inputNome" class="form-control form-control-lg font-weight-bold" placeholder="Nome da Empresa" value="Titu Gestão" readonly>
                                             </div>
+
                                             <div class="row">
-                                                <div class="col-6">
-                                                    <div class="form-group">
-                                                        <label>CNPJ</label>
-                                                        <input type="text" class="form-control" value="00.000.000/0001-00">
-                                                    </div>
+                                                <div class="col-md-6 form-group mb-3">
+                                                    <input type="text" name="cnpj" id="inputCnpj" class="form-control" placeholder="CNPJ (00.000.000/0000-00)" value="12.345.678/0001-90" readonly>
                                                 </div>
-                                                <div class="col-6">
-                                                    <div class="form-group">
-                                                        <label>Telefone de Contato</label>
-                                                        <input type="text" class="form-control" value="(21) 99999-9999">
-                                                    </div>
+
+                                                <div class="col-md-6 form-group mb-3">
+                                                    <input type="text" name="telefone" id="inputTelefone" class="form-control" placeholder="Telefone de Contato" value="(21) 99999-9999" readonly>
                                                 </div>
                                             </div>
-                                            <button type="button" class="btn btn-primary mt-2">Salvar Dados</button>
+
+                                            <div class="form-group mb-4">
+                                                <input type="email" name="email" id="inputEmail" class="form-control" placeholder="E-mail Oficial" value="contato@titu.com" readonly>
+                                            </div>
+
+                                            <div class="d-flex justify-content-end border-top pt-3">
+
+        <span class="text-muted d-flex align-items-center" sec:authorize="!hasAuthority('ADMIN')">
+            <i class="fas fa-lock mr-2"></i> Apenas o administrador pode alterar os dados da empresa.
+        </span>
+
+                                                <button type="button" id="btnEditar" class="btn btn-outline-secondary font-weight-bold mr-2" onclick="habilitarEdicao()" sec:authorize="hasAuthority('ADMIN')">
+                                                    <i class="fas fa-pen mr-1"></i> Editar Dados
+                                                </button>
+
+                                                <button type="submit" id="btnSalvar" class="btn btn-primary font-weight-bold shadow-sm d-none">
+                                                    <i class="fas fa-save mr-1"></i> Salvar Alterações
+                                                </button>
+
+                                            </div>
                                         </form>
                                     </div>
 
@@ -160,5 +175,21 @@
 </div>
 
 <div th:replace="~{fragments/geral :: scripts}"></div>
+<script>
+    function habilitarEdicao() {
+        // 1. Tira a trava (readonly) de todos os campos
+        document.getElementById('inputNome').removeAttribute('readonly');
+        document.getElementById('inputCnpj').removeAttribute('readonly');
+        document.getElementById('inputTelefone').removeAttribute('readonly');
+        document.getElementById('inputEmail').removeAttribute('readonly');
+
+        // 2. Foca automaticamente no campo do nome pra pessoa já começar a digitar
+        document.getElementById('inputNome').focus();
+
+        // 3. Esconde o botão Editar e mostra o botão Salvar
+        document.getElementById('btnEditar').classList.add('d-none');
+        document.getElementById('btnSalvar').classList.remove('d-none');
+    }
+</script>
 </body>
 </html>

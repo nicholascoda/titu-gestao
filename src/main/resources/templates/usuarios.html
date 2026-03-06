@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/geral :: head}"></head>
+
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+    <nav th:replace="~{geral :: navbar}"></nav>
+    <aside th:replace="~{geral :: sidebar}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="font-weight-bold">Gestão de Equipe</h1>
+                    </div>
+                    <div class="col-sm-6 text-right">
+                        <button class="btn btn-primary font-weight-bold shadow-sm" data-toggle="modal" data-target="#modal-novo-usuario">
+                            <i class="fas fa-plus mr-1"></i> Novo Usuário
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover table-valign-middle mb-0">
+                            <thead class="bg-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail (Login)</th>
+                                <th>Nível de Acesso</th>
+                                <th class="text-right pr-4">Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${usuarios}">
+                                <td>
+                                    <i th:if="${user.role == 'ADMIN'}" class="fas fa-user-shield text-primary mr-2"></i>
+                                    <i th:if="${user.role == 'USER'}" class="fas fa-user text-secondary mr-2"></i>
+                                    <strong th:text="${user.nome}">João</strong>
+                                </td>
+                                <td th:text="${user.email}">joao@titu.com</td>
+                                <td>
+                                    <span th:if="${user.role == 'ADMIN'}" class="badge bg-primary">Gerente (ADMIN)</span>
+                                    <span th:if="${user.role == 'USER'}" class="badge bg-secondary">Atendente (USER)</span>
+                                </td>
+                                <td class="text-right pr-4">
+                                    <a th:href="@{/usuarios/excluir/{id}(id=${user.id})}"
+                                       class="btn btn-sm btn-danger shadow-sm"
+                                       title="Revogar Acesso"
+                                       onclick="return confirm('Tem certeza que deseja remover o acesso deste funcionário?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal fade" id="modal-novo-usuario" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-user-plus mr-2"></i>Cadastrar Funcionário</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <form action="/usuarios/salvar" method="POST">
+                    <div class="modal-body p-4">
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold">Nome Completo</label>
+                            <input type="text" name="nome" class="form-control" required placeholder="Ex: Maria Silva">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold">E-mail (Usado para Login)</label>
+                            <input type="email" name="email" class="form-control" required placeholder="Ex: maria@titu.com">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold">Senha de Acesso</label>
+                            <input type="password" name="senha" class="form-control" required placeholder="Crie uma senha forte">
+                        </div>
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold">Permissão no Sistema</label>
+                            <select name="role" class="form-control custom-select" required>
+                                <option value="USER">Atendente Comum (Não vê configs/equipe)</option>
+                                <option value="ADMIN">Gerente (Acesso Total)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary font-weight-bold">Salvar Acesso</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/geral :: footer}"></footer>
+</div>
+
+<div th:replace="~{fragments/geral :: scripts}"></div>
+</body>
+</html>

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:fragment="head">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><head th:fragment="head">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Titu Gestão | Financeiro</title>
@@ -79,10 +78,10 @@
         <li class="nav-item dropdown">
             <a class="nav-link d-flex align-items-center" data-toggle="dropdown" href="#" style="padding-right: 1.5rem;">
                 <i class="fas fa-user-circle mr-2" style="font-size: 1.5rem;"></i>
-                <span class="d-none d-md-inline text-dark">Nicholas</span>
+                <span class="d-none d-md-inline text-dark font-weight-bold" th:text="${usuarioLogado.nome}">Usuário</span>
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <span class="dropdown-item dropdown-header text-left">Logado como: <b>Nicholas</b></span>
+                <span class="dropdown-item dropdown-header text-left">Logado como: <b th:text="${usuarioLogado.nome}">Usuário</b></span>
                 <div class="dropdown-divider"></div>
                 <a href="/perfil" class="dropdown-item">
                     <i class="fas fa-id-badge mr-2"></i> Meu Perfil
@@ -91,7 +90,10 @@
                     <i class="fas fa-cog mr-2"></i> Configurações
                 </a>
                 <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item text-danger" onclick="if(confirm('Deseja realmente sair?')) alert('Saindo do sistema...');">
+
+                <form id="form-logout" th:action="@{/logout}" method="post" class="d-none"></form>
+
+                <a href="#" class="dropdown-item text-danger font-weight-bold" onclick="document.getElementById('form-logout').submit(); return false;">
                     <i class="fas fa-sign-out-alt mr-2"></i> Sair do Sistema
                 </a>
             </div>
@@ -151,7 +153,13 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" sec:authorize="hasAuthority('ADMIN')">
+                    <a href="/usuarios" class="nav-link" th:classappend="${currentUri != null and currentUri.startsWith('/usuarios') ? 'active' : ''}">
+                        <i class="nav-icon fas fa-user-tie"></i>
+                        <p>Equipe / Usuários</p>
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasAuthority('ADMIN')">
                     <a href="/configuracoes" class="nav-link" th:classappend="${currentUri != null and currentUri.startsWith('/configuracoes') ? 'active' : ''}">
                         <i class="nav-icon fas fa-cog"></i>
                         <p>Configurações</p>

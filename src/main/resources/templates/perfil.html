@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/geral :: head}"></head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+    <nav th:replace="~{fragments/geral :: navbar}"></nav>
+    <aside th:replace="~{fragments/geral :: sidebar}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1 class="font-weight-bold">Meu Perfil</h1>
+            </div>
+        </section>
+        <section class="content">
+            <div class="card shadow-sm col-md-6">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-user-circle text-primary" style="font-size: 5rem;"></i>
+                    <h2 class="mt-3 font-weight-bold" th:text="${usuarioLogado.nome}">Nome</h2>
+                    <p class="text-muted" th:text="${usuarioLogado.email}">email</p>
+                    <span class="badge bg-primary" th:text="${usuarioLogado.role}">Nível</span>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{fragments/geral :: footer}"></footer>
+</div>
+<div th:replace="~{fragments/geral :: scripts}"></div>
+</body>
+</html>
