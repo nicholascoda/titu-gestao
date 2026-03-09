@@ -31,12 +31,12 @@
                                             <i class="fas fa-building mr-2"></i> Minha Empresa
                                         </a>
                                     </li>
-                                    <li class="nav-item">
+                                    <li class="nav-item" sec:authorize="hasAuthority('ADMIN')">
                                         <a class="nav-link" href="#aba-automacoes" data-toggle="tab">
                                             <i class="fas fa-robot mr-2"></i> Automações
                                         </a>
                                     </li>
-                                    <li class="nav-item">
+                                    <li class="nav-item" sec:authorize="hasAuthority('ADMIN')">
                                         <a class="nav-link" href="#aba-logs" data-toggle="tab">
                                             <i class="fas fa-history mr-2"></i> Log de Atividades
                                         </a>

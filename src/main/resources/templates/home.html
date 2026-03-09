@@ -9,13 +9,22 @@
     <aside th:replace="~{fragments/geral :: sidebar}"></aside>
 
     <div class="content-wrapper">
-        <div class="content-header">
+        <section class="content-header">
             <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6"><h1 class="m-0">Visão Geral</h1></div>
+                <div class="row mb-2 align-items-center">
+                    <div class="col-sm-6 d-flex align-items-center">
+                        <h1 class="m-0 font-weight-bold mr-3">Dashboard</h1>
+
+                        <form action="/" method="GET" class="m-0 shadow-sm rounded">
+                            <input type="month" name="mesBusca" class="form-control font-weight-bold border-0 bg-dark text-white"
+                                   th:value="${mesSelecionado}" onchange="this.form.submit()"
+                                   style="cursor: pointer; border-radius: 8px;">
+                        </form>
+
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <section class="content">
             <div class="container-fluid">

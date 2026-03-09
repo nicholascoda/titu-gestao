@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head th:replace="~{fragments/geral :: head}"></head>
 
 <body class="hold-transition sidebar-mini">
@@ -104,13 +104,24 @@
                                 <td>
                                     <a th:if="${titulo.status.name() == 'PENDENTE'}"
                                        th:href="@{/titulos/pagar/{id}(id=${titulo.id})}"
-                                       class="text-success" title="Dar Baixa"
+                                       class="text-success font-weight-bold" title="Dar Baixa"
                                        onclick="return confirm('Confirmar pagamento?');">
                                         <i class="fas fa-check-circle"></i> Pagar
                                     </a>
-                                    <span th:if="${titulo.status.name() == 'PAGO'}" class="text-muted">
-                                        <i class="fas fa-check"></i> Concluído
-                                    </span>
+
+                                    <div th:if="${titulo.status.name() == 'PAGO'}" class="d-flex align-items-center">
+                                        <span class="text-muted mr-3">
+                                            <i class="fas fa-check"></i> Concluído
+                                        </span>
+
+                                        <a th:href="@{/titulos/estornar/{id}(id=${titulo.id})}"
+                                           class="btn btn-xs btn-outline-danger shadow-sm"
+                                           title="Desfazer Baixa e voltar para Pendente"
+                                           onclick="return confirm('ATENÇÃO: Deseja cancelar este pagamento? A cobrança voltará a ficar PENDENTE.');"
+                                           sec:authorize="hasAuthority('ADMIN')">
+                                            <i class="fas fa-undo-alt mr-1"></i> Cancelar Pagamento
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             </tbody>

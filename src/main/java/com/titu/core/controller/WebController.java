@@ -38,13 +38,32 @@ public class WebController {
     }
 
     @GetMapping("/")
-    public String home(Model model) {
-        // Busca os indicadores no banco
-        model.addAttribute("totalPendente", tituloRepository.somarTotalPendente());
-        model.addAttribute("totalPago", tituloRepository.somarTotalPago());
-        model.addAttribute("qtdClientes", clienteService.listarTodos().size());
-        model.addAttribute("qtdVencidos", tituloRepository.contarVencidos());
+    public String home(@RequestParam(required = false) String mesBusca, Model model) {
+        // 1. Se o usuário não escolheu nenhum mês, pegamos o mês atual (Ex: 2026-03)
+        if (mesBusca == null || mesBusca.isEmpty()) {
+            mesBusca = java.time.YearMonth.now().toString();
+        }
 
+        // 2. Mandamos para o HTML qual mês está selecionado para o calendário preencher certo
+        model.addAttribute("mesSelecionado", mesBusca);
+
+        // 3. Calculamos o início e o fim do mês (Já deixando engatilhado para filtrarmos o banco!)
+        java.time.YearMonth anoMes = java.time.YearMonth.parse(mesBusca);
+        java.time.LocalDate inicioDoMes = anoMes.atDay(1);
+        java.time.LocalDate fimDoMes = anoMes.atEndOfMonth();
+
+        // -------------------------------------------------------------------------
+        Double pendenteMes = tituloRepository.somarTotalPendentePorPeriodo(inicioDoMes, fimDoMes);
+        Double pagoMes = tituloRepository.somarTotalPagoPorPeriodo(inicioDoMes, fimDoMes);
+        Long vencidosMes = tituloRepository.contarVencidosPorPeriodo(inicioDoMes, fimDoMes);
+
+        // Se o banco não achar nada no mês, ele devolve nulo. Isso evita dar erro na tela!
+        model.addAttribute("totalPendente", pendenteMes != null ? pendenteMes : 0.0);
+        model.addAttribute("totalPago", pagoMes != null ? pagoMes : 0.0);
+        model.addAttribute("qtdVencidos", vencidosMes != null ? vencidosMes : 0L);
+
+        // A quantidade de clientes eu mantive o total global, pois a carteira de clientes não zera todo mês!
+        model.addAttribute("qtdClientes", clienteService.listarTodos().size());
         return "home";
     }
 
@@ -200,6 +219,24 @@ public class WebController {
     @GetMapping("/login")
     public String login() {
         return "login"; // Vai chamar o nosso login.html
+    }
+
+    @GetMapping("/titulos/estornar/{id}")
+    public String estornarPagamento(@PathVariable Long id) {
+        // 1. Busca o título pelo ID
+        // (Assumindo que você tem o tituloRepository injetado no WebController)
+        com.titu.core.model.Titulo titulo = tituloRepository.findById(id).orElse(null);
+
+        if (titulo != null) {
+            // 2. Volta o status para PENDENTE
+            titulo.setStatus(com.titu.core.model.StatusTitulo.PENDENTE);
+
+            // 3. Salva a alteração
+            tituloRepository.save(titulo);
+        }
+
+        // 4. Volta para a tela de títulos automaticamente
+        return "redirect:/titulos";
     }
 
 }

@@ -4,6 +4,7 @@ import com.titu.core.model.StatusTitulo;
 import com.titu.core.model.Titulo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -46,5 +47,17 @@ public interface TituloRepository extends JpaRepository<Titulo, Long> {
     // t.dataVencimento DESC -> Os mais recentes/futuros aparecem primeiro
     @Query("SELECT t FROM Titulo t WHERE t.cliente.id = :clienteId ORDER BY t.status DESC, t.dataVencimento DESC")
     List<Titulo> buscarPorCliente(Long clienteId);
+
+    // Soma tudo que está PENDENTE dentro do mês escolhido
+    @Query("SELECT SUM(t.valorOriginal) FROM Titulo t WHERE t.status = 'PENDENTE' AND t.dataVencimento BETWEEN :inicio AND :fim")
+    Double somarTotalPendentePorPeriodo(@Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
+
+    // Soma tudo que está PAGO dentro do mês escolhido
+    @Query("SELECT SUM(t.valorOriginal) FROM Titulo t WHERE t.status = 'PAGO' AND t.dataVencimento BETWEEN :inicio AND :fim")
+    Double somarTotalPagoPorPeriodo(@Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
+
+    // Conta quantos títulos venceram (data de vencimento menor que hoje) e não foram pagos dentro daquele mês
+    @Query("SELECT COUNT(t) FROM Titulo t WHERE t.status = 'PENDENTE' AND t.dataVencimento BETWEEN :inicio AND :fim AND t.dataVencimento < CURRENT_DATE")
+    Long contarVencidosPorPeriodo(@Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
 
 }
