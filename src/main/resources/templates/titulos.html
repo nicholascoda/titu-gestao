@@ -126,8 +126,7 @@
 <div class="modal fade" id="modal-novo-titulo">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/titulos/salvar" method="post">
-                <div class="modal-header">
+            <form th:action="@{/titulos/salvar}" method="POST">                <div class="modal-header">
                     <h4 class="modal-title">Nova Cobrança</h4>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
@@ -157,8 +156,7 @@
 <div class="modal fade" id="modal-editar-titulo">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/titulos/salvar" method="post">
-                <div class="modal-header bg-info">
+            <form th:action="@{/titulos/salvar}" method="POST">                <div class="modal-header bg-info">
                     <h4 class="modal-title">Editar Cobrança</h4>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>

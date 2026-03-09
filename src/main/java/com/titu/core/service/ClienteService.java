@@ -35,15 +35,17 @@ public class ClienteService {
         }
 
         // --- 2. VALIDAÇÕES ---
-        // Regra 1: Não pode duplicar E-mail
-        if (repository.existsByEmail(cliente.getEmail())) {
-            throw new IllegalArgumentException("Já existe um cliente com este e-mail.");
+        // Regra 1: Não pode duplicar E-mail (Mas permite se for o próprio cliente editando)
+        java.util.Optional<Cliente> clientePorEmail = repository.findByEmail(cliente.getEmail());
+        if (clientePorEmail.isPresent() && !clientePorEmail.get().getId().equals(cliente.getId())) {
+            throw new IllegalArgumentException("Já existe um cliente cadastrado com este e-mail.");
         }
 
-        // Regra 2: Se tiver CNPJ, não pode duplicar também
+        // Regra 2: Se tiver CNPJ, não pode duplicar também (Mas permite o próprio cliente)
         if (cliente.getCnpj() != null && !cliente.getCnpj().isBlank()) {
-            if (repository.existsByCnpj(cliente.getCnpj())) {
-                throw new IllegalArgumentException("Já existe um cliente com este CNPJ.");
+            java.util.Optional<Cliente> clientePorCnpj = repository.findByCnpj(cliente.getCnpj());
+            if (clientePorCnpj.isPresent() && !clientePorCnpj.get().getId().equals(cliente.getId())) {
+                throw new IllegalArgumentException("Já existe um cliente cadastrado com este CNPJ.");
             }
         }
 

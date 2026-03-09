@@ -78,32 +78,25 @@ public class WebController {
 
     // 2. ROTA PARA SALVAR (Com Validação Inteligente)
     @PostMapping("/clientes/salvar")
-    public String salvarCliente(@Valid @ModelAttribute("cliente") Cliente cliente, BindingResult result, Model model) {
-
-        // Se tiver erro básico (ex: campo vazio)
-        if (result.hasErrors()) {
-            // Recarrega a lista de baixo (se não ela some)
-            model.addAttribute("clientes", clienteService.listarTodos());
-            // Avisa pro HTML que o modal tem que ficar aberto
-            model.addAttribute("modalAberto", true);
-            return "clientes"; // Volta pra mesma tela (não faz redirect)
-        }
+    public String salvarCliente(@ModelAttribute Cliente cliente, RedirectAttributes redirectAttributes) {
 
         try {
+            // Tenta salvar (tanto faz se é novo ou edição)
             clienteService.salvar(cliente);
-        } catch (IllegalArgumentException e) {
-            // Se der erro de duplicação (Regra de Negócio do Service)
-            // Jogamos o erro para o campo "email" (ou geral)
-            result.rejectValue("email", "error.cliente", e.getMessage());
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Cliente salvo com sucesso!");
 
-            model.addAttribute("clientes", clienteService.listarTodos());
-            model.addAttribute("modalAberto", true);
-            return "clientes";
+        } catch (IllegalArgumentException e) {
+            // Se o Service reclamar (ex: E-mail já existe), mostra erro vermelho!
+            redirectAttributes.addFlashAttribute("mensagemErro", "Atenção: " + e.getMessage());
+
+        } catch (Exception e) {
+            // Se der qualquer outro erro maluco no banco
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro inesperado ao salvar cliente.");
         }
 
+        // Redireciona limpando a URL e fechando os modais
         return "redirect:/clientes";
     }
-
     @GetMapping("/titulos")
     @Transactional
     public String paginaTitulos(@RequestParam(required = false) String filtro, Model model) {
@@ -238,5 +231,26 @@ public class WebController {
         // 4. Volta para a tela de títulos automaticamente
         return "redirect:/titulos";
     }
+
+    // --- 2. ROTA PARA ATUALIZAR O PERFIL ---
+    @PostMapping("/perfil/atualizar")
+    public String atualizarPerfil(String nome, String senha, RedirectAttributes redirectAttributes) {
+
+        // (No futuro: Lógica para ir no banco de dados e mudar o nome/senha de verdade)
+
+        redirectAttributes.addFlashAttribute("mensagemSucesso", "Perfil atualizado com sucesso!");
+        return "redirect:/configuracoes";
+    }
+    // --- 3. ROTA PARA SALVAR A EMPRESA ---
+    @PostMapping("/configuracoes/empresa/salvar")
+    public String salvarEmpresa(String nomeFantasia, String cnpj, String telefone, String email, RedirectAttributes redirectAttributes) {
+
+        // (No futuro: Lógica para salvar os dados da empresa no banco)
+
+        redirectAttributes.addFlashAttribute("mensagemSucesso", "Dados da empresa atualizados com sucesso!");
+        return "redirect:/configuracoes";
+    }
+
+
 
 }

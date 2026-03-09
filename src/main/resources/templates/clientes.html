@@ -98,8 +98,7 @@
 <div class="modal fade" id="modal-novo-cliente">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/clientes/salvar" method="post">
-                <div class="modal-header">
+            <form th:action="@{/clientes/salvar}" method="POST">                <div class="modal-header">
                     <h4 class="modal-title">Novo Cliente</h4>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
@@ -149,8 +148,7 @@
 <div class="modal fade" id="modal-editar-cliente">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/clientes/salvar" method="post">
-                <div class="modal-header bg-info">
+            <form th:action="@{/clientes/salvar}" method="POST">                <div class="modal-header bg-info">
                     <h4 class="modal-title">Editar Cliente</h4>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
@@ -222,12 +220,6 @@
             modal.find('#edit-telefone').val(button.data('telefone')).trigger('input');
             modal.find('#edit-email').val(button.data('email'));
         });
-    });
-</script>
-
-<script th:if="${modalAberto}">
-    $(function() {
-        $('#modal-novo-cliente').modal('show');
     });
 </script>
 </body>

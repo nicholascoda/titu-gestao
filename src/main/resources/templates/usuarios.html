@@ -5,8 +5,8 @@
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 
-    <nav th:replace="~{geral :: navbar}"></nav>
-    <aside th:replace="~{geral :: sidebar}"></aside>
+    <nav th:replace="~{fragments/geral :: navbar}"></nav>
+    <aside th:replace="~{fragments/geral :: sidebar}"></aside>
 
     <div class="content-wrapper">
         <section class="content-header">
@@ -76,8 +76,7 @@
                     </button>
                 </div>
 
-                <form action="/usuarios/salvar" method="POST">
-                    <div class="modal-body p-4">
+                <form th:action="@{/usuarios/salvar}" method="POST">                    <div class="modal-body p-4">
                         <div class="form-group mb-3">
                             <label class="font-weight-bold">Nome Completo</label>
                             <input type="text" name="nome" class="form-control" required placeholder="Ex: Maria Silva">
