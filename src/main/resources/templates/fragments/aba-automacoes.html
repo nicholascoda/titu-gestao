@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="automacoes" class="tab-pane fade" id="aba-automacoes" role="tabpanel">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="font-weight-bold m-0"><i class="fas fa-robot text-primary mr-2"></i> Robô de Cobrança</h4>
+        <span class="badge badge-info px-3 py-2"><i class="fas fa-globe mr-1"></i> Regras Globais</span>
+    </div>
+
+    <div class="alert alert-light border border-info shadow-sm mb-4">
+        <i class="fas fa-info-circle text-info mr-2"></i> <strong>Atenção:</strong> Estas configurações serão aplicadas como padrão para <b>todos os clientes</b>.
+    </div>
+
+    <form th:action="@{/configuracoes/automacoes/salvar}" method="POST" th:object="${configRobo}">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light border-0"><h5 class="card-title font-weight-bold">Régua de Disparos Mínima</h5></div>
+                    <div class="card-body">
+                        <div class="custom-control custom-switch mb-3">
+                            <input type="checkbox" class="custom-control-input" id="switchPre" th:field="*{preventivoAtivo}">
+                            <label class="custom-control-label" for="switchPre">Lembrete Preventivo (3 dias antes do vencimento)</label>
+                        </div>
+                        <div class="custom-control custom-switch mb-3">
+                            <input type="checkbox" class="custom-control-input" id="switchDia" th:field="*{vencimentoAtivo}">
+                            <label class="custom-control-label" for="switchDia">Aviso de Vencimento (No dia exato)</label>
+                        </div>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="switchAtraso" th:field="*{atrasoAtivo}">
+                            <label class="custom-control-label" for="switchAtraso">Alerta de Atraso Mensal (1 dia após o vencimento)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light border-0"><h5 class="card-title font-weight-bold">Tom da Mensagem</h5></div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Linguagem Padrão dos E-mails</label>
+                            <select class="form-control" th:field="*{tomMensagem}">
+                                <option value="FORMAL">👔 Formal (Prezado cliente...)</option>
+                                <option value="MEDIO">🤝 Comercial (Olá, sua fatura...)</option>
+                                <option value="INFORMAL">😎 Amigável (E aí! Passando pra...)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary font-weight-bold shadow-sm">
+            <i class="fas fa-save mr-1"></i> Salvar Automações Globais
+        </button>
+    </form>
+
+</div>
+</body>
+</html>

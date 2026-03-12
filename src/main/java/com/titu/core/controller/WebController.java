@@ -31,6 +31,9 @@ public class WebController {
     private final EmailService emailService;
     private final TituloRepository  tituloRepository;
     private final com.titu.core.repository.LogAcaoRepository logAcaoRepository;
+    private final com.titu.core.service.ConfiguracaoService configuracaoService;
+
+
 
     @ModelAttribute("currentUri")
     public String getCurrentUri(HttpServletRequest request) {
@@ -202,9 +205,12 @@ public class WebController {
     }
 
     @GetMapping("/configuracoes")
-    public String configuracoes(Model model) {
-        // Busca todos os logs no banco de dados já ordenados do mais recente pro mais antigo
-        model.addAttribute("logs", logAcaoRepository.findAllByOrderByDataHoraDesc());
+    public String paginaConfiguracoes(Model model) {
+        // Pega a configuração atual (se não existir, ele cria a DEFAULT na hora!)
+        com.titu.core.model.ConfiguracaoRobo configRobo = configuracaoService.obterConfiguracaoAtual();
+
+        // Manda pro HTML
+        model.addAttribute("configRobo", configRobo);
 
         return "configuracoes";
     }
@@ -251,6 +257,21 @@ public class WebController {
         return "redirect:/configuracoes";
     }
 
+    @PostMapping("/configuracoes/automacoes/salvar")
+    public String salvarAutomacoes(com.titu.core.model.ConfiguracaoRobo formRobo, RedirectAttributes redirectAttributes) {
+
+        // Pegamos a configuração que já está no banco para não perder o ID
+        com.titu.core.model.ConfiguracaoRobo configAtual = configuracaoService.obterConfiguracaoAtual();
+        formRobo.setId(configAtual.getId());
+
+        // Salva as novas escolhas do usuário
+        configuracaoService.salvarConfiguracao(formRobo);
+
+        redirectAttributes.addFlashAttribute("mensagemSucesso", "As regras do Robô foram atualizadas!");
+        redirectAttributes.addFlashAttribute("abaAtiva", "automacoes"); // Fofoca pra manter na aba certa
+
+        return "redirect:/configuracoes";
+    }
 
 
 }

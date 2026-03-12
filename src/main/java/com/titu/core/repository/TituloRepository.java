@@ -60,4 +60,7 @@ public interface TituloRepository extends JpaRepository<Titulo, Long> {
     @Query("SELECT COUNT(t) FROM Titulo t WHERE t.status = 'PENDENTE' AND t.dataVencimento BETWEEN :inicio AND :fim AND t.dataVencimento < CURRENT_DATE")
     Long contarVencidosPorPeriodo(@Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
 
+    // Procura todos os títulos que têm um determinado status (ex: PENDENTE) e uma data de vencimento específica
+    List<Titulo> findByStatusAndDataVencimento(com.titu.core.model.StatusTitulo status, java.time.LocalDate dataVencimento);
+
 }

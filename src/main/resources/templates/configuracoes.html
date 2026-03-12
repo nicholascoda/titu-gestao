@@ -167,18 +167,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="tab-pane fade" id="aba-automacoes" role="tabpanel">
-                                        <h4 class="mb-4 font-weight-bold">Configurações do Robô de Cobrança</h4>
-                                        <div class="custom-control custom-switch mb-3">
-                                            <input type="checkbox" class="custom-control-input" id="switch1" checked>
-                                            <label class="custom-control-label" for="switch1">Enviar e-mail de lembrete 3 dias antes do vencimento</label>
-                                        </div>
-                                        <div class="custom-control custom-switch mb-4">
-                                            <input type="checkbox" class="custom-control-input" id="switch2" checked>
-                                            <label class="custom-control-label" for="switch2">Enviar alerta de título atrasado no dia seguinte ao vencimento</label>
-                                        </div>
-                                        <button type="button" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Salvar Automações</button>
-                                    </div>
+                                    <div th:replace="~{fragments/aba-automacoes :: automacoes}"></div>
 
                                     <div class="tab-pane fade" id="aba-logs" role="tabpanel">
                                         <h4 class="mb-4 font-weight-bold">Log de Auditoria</h4>
