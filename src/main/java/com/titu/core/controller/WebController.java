@@ -32,7 +32,8 @@ public class WebController {
     private final TituloRepository  tituloRepository;
     private final com.titu.core.repository.LogAcaoRepository logAcaoRepository;
     private final com.titu.core.service.ConfiguracaoService configuracaoService;
-
+    private final com.titu.core.repository.ClienteRepository clienteRepository;
+    private final com.titu.core.repository.LogDisparoRepository logDisparoRepository;
 
 
     @ModelAttribute("currentUri")
@@ -67,6 +68,9 @@ public class WebController {
 
         // A quantidade de clientes eu mantive o total global, pois a carteira de clientes não zera todo mês!
         model.addAttribute("qtdClientes", clienteService.listarTodos().size());
+
+        model.addAttribute("ultimosDisparos", logDisparoRepository.findTop5ByOrderByDataHoraEnvioDesc());
+
         return "home";
     }
 
@@ -201,7 +205,10 @@ public class WebController {
         // Busca as dívidas ordenadas (Pendente primeiro)
         model.addAttribute("titulos", tituloService.listarPorCliente(id));
 
-        return "cliente-detalhes"; // Vamos criar esse HTML agora
+        // NOVA LINHA: Busca o histórico da Caixa Preta do Titu-Bô
+        model.addAttribute("historicoEmails", logDisparoRepository.findByClienteIdOrderByDataHoraEnvioDesc(id));
+
+        return "cliente-detalhes";
     }
 
     @GetMapping("/configuracoes")
@@ -272,6 +279,7 @@ public class WebController {
 
         return "redirect:/configuracoes";
     }
+
 
 
 }

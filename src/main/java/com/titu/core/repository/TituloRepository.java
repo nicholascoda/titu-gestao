@@ -63,4 +63,5 @@ public interface TituloRepository extends JpaRepository<Titulo, Long> {
     // Procura todos os títulos que têm um determinado status (ex: PENDENTE) e uma data de vencimento específica
     List<Titulo> findByStatusAndDataVencimento(com.titu.core.model.StatusTitulo status, java.time.LocalDate dataVencimento);
 
+
 }

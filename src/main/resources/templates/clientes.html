@@ -72,7 +72,13 @@
                                             th:data-responsavel="${cliente.nomeResponsavel}"
                                             th:data-cpf="${cliente.cnpj}"
                                             th:data-telefone="${cliente.telefone}"
-                                            th:data-email="${cliente.email}">
+                                            th:data-email="${cliente.email}"
+
+                                            th:data-usar-globais="${cliente.usarRegrasGlobais}"
+                                            th:data-preventivo="${cliente.preventivoAtivo}"
+                                            th:data-vencimento="${cliente.vencimentoAtivo}"
+                                            th:data-atraso="${cliente.atrasoAtivo}"
+                                            th:data-tom="${cliente.tomMensagem}">
                                         <i class="fas fa-pen"></i>
                                     </button>
 
@@ -146,57 +152,98 @@
 </div>
 
 <div class="modal fade" id="modal-editar-cliente">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form th:action="@{/clientes/salvar}" method="POST">                <div class="modal-header bg-info">
-                    <h4 class="modal-title">Editar Cliente</h4>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-                <div class="modal-body">
+    <div class="modal-dialog modal-lg"> <div class="modal-content">
+        <form th:action="@{/clientes/salvar}" method="POST">
+            <div class="modal-header bg-info">
+                <h4 class="modal-title">Editar Cliente</h4>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
 
-                    <input type="hidden" id="edit-id" name="id">
+                <input type="hidden" id="edit-id" name="id">
 
-                    <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6 form-group">
                         <label>Nome da Empresa / Fantasia</label>
                         <input type="text" id="edit-nome" name="nomeEmpresa" class="form-control" required>
                     </div>
-
-                    <div class="form-group">
+                    <div class="col-md-6 form-group">
                         <label>Nome do Responsável</label>
                         <input type="text" id="edit-responsavel" name="nomeResponsavel" class="form-control" required>
                     </div>
+                </div>
 
-                    <div class="form-group">
+                <div class="row">
+                    <div class="col-md-4 form-group">
                         <label>CPF ou CNPJ</label>
                         <input type="text" id="edit-cpf" name="cnpj" class="form-control mask-cpf-cnpj">
                     </div>
+                    <div class="col-md-4 form-group">
+                        <label>WhatsApp / Telefone</label>
+                        <input type="text" id="edit-telefone" name="telefone" class="form-control mask-telefone">
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label>E-mail</label>
+                        <input type="email" id="edit-email" name="email" class="form-control">
+                    </div>
+                </div>
 
+                <hr>
+                <h5 class="text-info font-weight-bold mb-3">
+                    <i class="fas fa-robot"></i> Configurações do Robô (VIP)
+                </h5>
+
+                <div class="form-group mb-2">
+                    <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                        <input type="checkbox" class="custom-control-input" id="edit-usar-globais" name="usarRegrasGlobais" value="true">
+                        <input type="hidden" name="_usarRegrasGlobais" value="on"/>
+                        <label class="custom-control-label font-weight-bold" for="edit-usar-globais">Usar Regras Globais do Sistema</label>
+                    </div>
+                    <small class="text-muted d-block mt-1">Se desmarcado, você poderá personalizar como o robô cobra este cliente específico.</small>
+                </div>
+
+                <div id="container-regras-vip" class="p-3 mt-3 bg-light border rounded shadow-sm" style="display: none;">
                     <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label>WhatsApp / Telefone</label>
-                                <input type="text" id="edit-telefone" name="telefone" class="form-control mask-telefone">
+                        <div class="col-md-7 border-right">
+                            <label class="text-muted mb-2">Réguas de Disparo Específicas:</label>
+                            <div class="custom-control custom-switch mb-2">
+                                <input type="checkbox" class="custom-control-input" id="edit-preventivo" name="preventivoAtivo" value="true">
+                                <input type="hidden" name="_preventivoAtivo" value="on"/>
+                                <label class="custom-control-label" for="edit-preventivo">Aviso Preventivo (3 dias)</label>
+                            </div>
+                            <div class="custom-control custom-switch mb-2">
+                                <input type="checkbox" class="custom-control-input" id="edit-vencimento" name="vencimentoAtivo" value="true">
+                                <input type="hidden" name="_vencimentoAtivo" value="on"/>
+                                <label class="custom-control-label" for="edit-vencimento">Aviso no Dia (Hoje)</label>
+                            </div>
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="edit-atraso" name="atrasoAtivo" value="true">
+                                <input type="hidden" name="_atrasoAtivo" value="on"/>
+                                <label class="custom-control-label" for="edit-atraso">Aviso de Atraso (Ontem)</label>
                             </div>
                         </div>
 
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label>E-mail</label>
-                                <input type="email" id="edit-email" name="email" class="form-control">
+                        <div class="col-md-5 pl-4">
+                            <div class="form-group mb-0">
+                                <label class="text-muted">Tom da Mensagem:</label>
+                                <select id="edit-tom" name="tomMensagem" class="form-control">
+                                    <option value="FORMAL">👔 Formal</option>
+                                    <option value="MEDIO">🤝 Comercial</option>
+                                    <option value="INFORMAL">😎 Amigável</option>
+                                </select>
                             </div>
                         </div>
                     </div>
-
                 </div>
-                <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-info">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="modal-footer justify-content-between bg-light">
+                <button type="button" class="btn btn-default shadow-sm" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-info font-weight-bold shadow-sm"><i class="fas fa-save mr-1"></i> Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
     </div>
 </div>
-
 <div th:replace="~{fragments/geral :: scripts}"></div>
 
 <script th:inline="none">
@@ -208,7 +255,21 @@
             "columnDefs": [ { "orderable": false, "targets": [4, 5] } ]
         });
 
-        // LÓGICA DO MODAL EDITAR (Preenche os campos)
+        // Função para esconder/mostrar o painel VIP
+        function toggleRegrasVip() {
+            if ($('#edit-usar-globais').is(':checked')) {
+                $('#container-regras-vip').slideUp(); // Esconde com animação
+            } else {
+                $('#container-regras-vip').slideDown(); // Mostra com animação
+            }
+        }
+
+        // Quando o usuário clicar na chavinha global, roda a animação
+        $('#edit-usar-globais').change(function() {
+            toggleRegrasVip();
+        });
+
+        // LÓGICA DO MODAL EDITAR (Preenche os campos quando clica no botão Editar)
         $('#modal-editar-cliente').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var modal = $(this);
@@ -216,9 +277,19 @@
             modal.find('#edit-id').val(button.data('id'));
             modal.find('#edit-nome').val(button.data('nome'));
             modal.find('#edit-responsavel').val(button.data('responsavel'));
-            modal.find('#edit-cpf').val(button.data('cpf')).trigger('input'); // o trigger avisa a máscara pra rodar
+            modal.find('#edit-cpf').val(button.data('cpf')).trigger('input');
             modal.find('#edit-telefone').val(button.data('telefone')).trigger('input');
             modal.find('#edit-email').val(button.data('email'));
+
+            // PREENCHE AS CHAVINHAS DO ROBÔ VIP
+            modal.find('#edit-usar-globais').prop('checked', button.data('usar-globais'));
+            modal.find('#edit-preventivo').prop('checked', button.data('preventivo'));
+            modal.find('#edit-vencimento').prop('checked', button.data('vencimento'));
+            modal.find('#edit-atraso').prop('checked', button.data('atraso'));
+            modal.find('#edit-tom').val(button.data('tom'));
+
+            // Verifica se a caixinha deve começar aberta ou fechada
+            toggleRegrasVip();
         });
     });
 </script>

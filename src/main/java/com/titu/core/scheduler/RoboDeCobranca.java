@@ -24,6 +24,7 @@ public class RoboDeCobranca {
     private final TituloRepository tituloRepository;
     private final EmailService emailService;
     private final ConfiguracaoService configuracaoService; // <-- Lê as chavinhas do banco
+    private final com.titu.core.repository.LogDisparoRepository logDisparoRepository; // <-- O Caderninho de anotações!
 
     // Mantemos a cada 1 minuto ("0 * * * * *") APENAS PARA TESTES!
     @Transactional
@@ -79,7 +80,7 @@ public class RoboDeCobranca {
         System.out.println("==================================================\n");
     }
 
-    // --- MÉTODO AUXILIAR PARA MANTER O SEU PADRÃO DE AVISOS ---
+    // --- MeTODO AUXILIAR PARA MANTER O SEU PADRÃO DE AVISOS ---
     private void processarCobrancas(List<Titulo> titulos, String nomeRegua, String tom, String tipoRegua) {
 
         // Exatamente a sua lógica de avisos
@@ -107,6 +108,17 @@ public class RoboDeCobranca {
 
                 // 4. Puxa o gatilho!
                 emailService.enviarEmailSimples(titulo.getCliente().getEmail(), assunto, mensagem);
+
+                // --- A CAIXA PRETA: Registrando o tiro no banco de dados! ---
+                com.titu.core.model.LogDisparo log = new com.titu.core.model.LogDisparo();
+                log.setCliente(titulo.getCliente());
+                log.setTipoRegua(tipoRegua);
+                log.setAssunto(assunto);
+                log.setMensagem(mensagem);
+                log.setDataHoraEnvio(LocalDateTime.now());
+                logDisparoRepository.save(log); // Salva no banco!
+
+                System.out.println("   -> 📝 Log de disparo salvo com sucesso para " + titulo.getCliente().getNomeEmpresa());
 
                 // 5. O Robô "respira" por 2 segundos para o Mailtrap não bloquear
                 try {

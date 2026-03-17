@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "clientes")
-@Data // Lombok: Gera Getters, Setters, toString, hashCode
-@NoArgsConstructor // Obrigatório para o JPA
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Cliente {
@@ -34,6 +34,26 @@ public class Cliente {
     private String telefone;
 
     private String cnpj;
+
+// ==========================================
+    // 🤖 CONFIGURAÇÕES VIP DO ROBÔ DE COBRANÇA
+    // ==========================================
+
+    @Builder.Default
+    private Boolean usarRegrasGlobais = true; // Mudou para Boolean (maiúsculo)
+
+    @Builder.Default
+    private Boolean preventivoAtivo = true; // Mudou para Boolean (maiúsculo)
+
+    @Builder.Default
+    private Boolean vencimentoAtivo = true; // Mudou para Boolean (maiúsculo)
+
+    @Builder.Default
+    private Boolean atrasoAtivo = true; // Mudou para Boolean (maiúsculo)
+
+    @Builder.Default
+    private String tomMensagem = "MEDIO";
+    // ==========================================
 
     @Column(updatable = false)
     private LocalDateTime dataCadastro;

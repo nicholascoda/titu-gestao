@@ -28,6 +28,7 @@
 
         <section class="content">
             <div class="container-fluid">
+
                 <div class="row">
 
                     <div class="col-lg-3 col-6">
@@ -75,12 +76,119 @@
                     </div>
 
                 </div>
-            </div>
+                <div class="row mt-4">
+
+                    <div class="col-lg-8 col-md-12">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-white border-0">
+                                <h3 class="card-title font-weight-bold text-dark">
+                                    <i class="fas fa-chart-bar text-primary mr-2"></i> Receitas x Inadimplência (Últimos 6 meses)
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="position-relative mb-4">
+                                    <canvas id="receitasChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <div class="col-lg-4 col-md-12">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-dark text-white border-0">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-robot text-info mr-2"></i> Titu-Bô
+                            </h3>
+                        </div>
+
+                        <div class="card-body p-0" style="max-height: 350px; overflow-y: auto;">
+                            <ul class="products-list product-list-in-card pl-3 pr-3">
+
+                                <li class="item text-center p-4 text-muted" th:if="${#lists.isEmpty(ultimosDisparos)}">
+                                    <i class="fas fa-check-double fa-2x mb-2 text-success"></i><br>
+                                    <small>Nenhuma cobrança recente.</small>
+                                </li>
+
+                                <li class="item" th:each="log : ${ultimosDisparos}">
+                                    <div class="product-info ml-0">
+                                        <a th:href="@{/clientes/{id}/detalhes(id=${log.cliente.id})}" class="product-title text-dark font-weight-bold text-sm">
+                                            <i class="fas fa-building text-secondary mr-1"></i> <span th:text="${log.cliente.nomeEmpresa}">Empresa</span>
+
+                                            <span class="badge float-right"
+                                                  th:classappend="${log.tipoRegua == 'PREVENTIVO' ? 'bg-info' : (log.tipoRegua == 'HOJE' ? 'bg-warning' : 'bg-danger')}"
+                                                  th:text="${log.tipoRegua == 'PREVENTIVO' ? 'Preventivo' : (log.tipoRegua == 'HOJE' ? 'No Vencimento' : 'Atrasado')}">
+                                                </span>
+                                        </a>
+                                        <span class="product-description text-muted mt-1" style="font-size: 0.85rem;">
+                                                <i class="far fa-clock mr-1"></i> <span th:text="${#temporals.format(log.dataHoraEnvio, 'dd/MM/yyyy')}">Data</span>
+                                                <br>
+                                                <i class="fas fa-envelope-open-text mr-1"></i> <span th:text="${log.assunto}">Assunto</span>
+                                            </span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div> </div> ```
+
+ </div>
         </section>
     </div>
 
     <footer th:replace="~{fragments/geral :: footer}"></footer>
 </div>
 <div th:replace="~{fragments/geral :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    $(function () {
+        // Pegando o contexto do Canvas
+        var ctx = document.getElementById('receitasChart').getContext('2d');
+
+        // Configurando o Gráfico
+        var receitasChart = new Chart(ctx, {
+            type: 'bar', // Gráfico de barras
+            data: {
+                labels: ['Out/25', 'Nov/25', 'Dez/25', 'Jan/26', 'Fev/26', 'Mar/26'], // Meses
+                datasets: [
+                    {
+                        label: 'Recebido (R$)',
+                        backgroundColor: '#28a745', // Verde sucesso
+                        borderColor: '#28a745',
+                        data: [12500, 15000, 14200, 18000, 16500, 21000], // Dados de exemplo
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Inadimplência (R$)',
+                        backgroundColor: '#dc3545', // Vermelho perigo
+                        borderColor: '#dc3545',
+                        data: [2000, 1500, 3200, 1100, 500, 1800], // Dados de exemplo
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f0f0f0'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>
