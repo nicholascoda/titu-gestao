@@ -1,10 +1,16 @@
 package com.titu.core.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
+@Builder // <-- A mágica acontece aqui!
+@NoArgsConstructor // <-- Obrigatório para o banco de dados (JPA)
+@AllArgsConstructor // <-- Obrigatório para o Builder funcionar
 @Entity
 @Table(name = "logs_disparos")
 public class LogDisparo {

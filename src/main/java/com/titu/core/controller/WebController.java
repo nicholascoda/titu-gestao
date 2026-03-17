@@ -257,10 +257,9 @@ public class WebController {
     // --- 3. ROTA PARA SALVAR A EMPRESA ---
     @PostMapping("/configuracoes/empresa/salvar")
     public String salvarEmpresa(String nomeFantasia, String cnpj, String telefone, String email, RedirectAttributes redirectAttributes) {
-
-        // (No futuro: Lógica para salvar os dados da empresa no banco)
-
+        // ... lógica de salvar ...
         redirectAttributes.addFlashAttribute("mensagemSucesso", "Dados da empresa atualizados com sucesso!");
+        redirectAttributes.addFlashAttribute("abaAtiva", "empresa");
         return "redirect:/configuracoes";
     }
 

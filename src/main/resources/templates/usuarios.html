@@ -110,5 +110,26 @@
 </div>
 
 <div th:replace="~{fragments/geral :: scripts}"></div>
+<div th:replace="~{fragments/geral :: scripts}"></div>
+
+<script th:inline="javascript">
+    $(document).ready(function() {
+        // MÁGICA DE ABRIR O MODAL AUTOMATICAMENTE
+        // Verifica se a URL tem o parâmetro ?novo=true (quando vem da tela de configurações)
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (urlParams.get('novo') === 'true') {
+            // Se tiver, manda o Bootstrap abrir o modal!
+            $('#modal-novo-usuario').modal('show');
+
+            // Opcional de UX Sênior: Limpa a URL depois de abrir o modal,
+            // para não abrir de novo sem querer se o usuário der F5 na página
+            window.history.replaceState({}, document.title, "/usuarios");
+        }
+    });
+</script>
+
+</body>
+</html>
 </body>
 </html>
