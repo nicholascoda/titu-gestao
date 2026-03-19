@@ -17,7 +17,7 @@ import java.util.List;
 public class TituloService {
 
     private final TituloRepository tituloRepository;
-    private final ClienteService clienteService; // Vamos usar o service do cliente pra buscar ele!
+    private final ClienteService clienteService;
     private final LogAcaoService logService;
 
     @Transactional
@@ -25,12 +25,12 @@ public class TituloService {
         Cliente cliente = clienteService.buscarPorId(clienteId);
         Titulo tituloFinal;
 
-        // --- 0. DESCOBRIR A AÇÃO ---
+        // 0. DESCOBRIR A AÇÃO
         // Se já tem ID no formulário, é uma edição. Se não tem, é criação.
         String acao = (tituloForm.getId() != null) ? "EDITAR" : "CRIAR";
 
         if (tituloForm.getId() != null) {
-            // --- ATUALIZAÇÃO (EDITAR) ---
+            // EDITAR
             tituloFinal = tituloRepository.findById(tituloForm.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Título não encontrado"));
 
@@ -40,7 +40,7 @@ public class TituloService {
             tituloFinal.setCliente(cliente);
 
         } else {
-            // --- CRIAÇÃO (NOVO) ---
+            // CRIAR
             tituloFinal = tituloForm;
             tituloFinal.setCliente(cliente);
             tituloFinal.setStatus(StatusTitulo.PENDENTE);
@@ -50,10 +50,10 @@ public class TituloService {
             tituloFinal.setDataPagamento(LocalDate.now());
         }
 
-        // --- 1. SALVAR NO BANCO ---
+        // 1. SALVAR NO BANCO
         Titulo tituloSalvo = tituloRepository.save(tituloFinal);
 
-        // --- 2. GRAVAR O LOG ---
+        // 2. GRAVAR O LOG
         logService.registrarAcao(acao, "Cobrança de R$ " + tituloSalvo.getValorOriginal() + " (" + tituloSalvo.getDescricao() + ") para " + cliente.getNomeEmpresa());
 
         return tituloSalvo;
@@ -63,18 +63,17 @@ public class TituloService {
         return tituloRepository.findAllComCliente();    }
 
     public void excluir(Long id) {
-        // 1. Busca o título ANTES de apagar, para a gente saber o nome/descrição dele pro Log
+        // 1. busca o título ANTES de apagar, para a gente saber o nome/descrição dele pro Log
         Titulo titulo = tituloRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Título não encontrado"));
 
-        // 2. Apaga do banco
+        // 2. apaga do banco
         tituloRepository.deleteById(id);
 
-        // 3. Grava o Log com a fofoca completa
+        // 3. grava o Log com a fofoca completa
         logService.registrarAcao("EXCLUIR", "Cobrança removida: " + titulo.getDescricao() + " (Cliente: " + titulo.getCliente().getNomeEmpresa() + ")");
     }
 
-    // Importe o StatusTitulo se precisar
     public void darBaixa(Long id) {
         Titulo titulo = tituloRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Título não encontrado"));
@@ -82,7 +81,7 @@ public class TituloService {
         titulo.setStatus(StatusTitulo.PAGO);
         tituloRepository.save(titulo);
 
-        // Grava o Log do pagamento
+        // log do pagamento
         logService.registrarAcao("PAGAMENTO", "Baixa confirmada: " + titulo.getDescricao() + " (Cliente: " + titulo.getCliente().getNomeEmpresa() + ")");
     }
 
@@ -91,7 +90,6 @@ public class TituloService {
                 .orElseThrow(() -> new IllegalArgumentException("Título não encontrado com ID: " + id));
     }
 
-    // Metodo Inteligente de Listagem
     public List<Titulo> listarComFiltro(String filtro) {
         if ("pagos".equals(filtro)) {
             return tituloRepository.findAllByStatus(StatusTitulo.PAGO);
@@ -100,7 +98,6 @@ public class TituloService {
         } else if ("vencidos".equals(filtro)) {
             return tituloRepository.findVencidos();
         } else {
-            // Se não tiver filtro (ou filtro desconhecido), traz tudo
             return tituloRepository.findAllComCliente();
         }
     }

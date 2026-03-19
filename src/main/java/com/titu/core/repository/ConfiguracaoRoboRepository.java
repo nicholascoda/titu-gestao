@@ -4,5 +4,5 @@ import com.titu.core.model.ConfiguracaoRobo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ConfiguracaoRoboRepository extends JpaRepository<ConfiguracaoRobo, Long> {
-    // O Spring Boot faz a mágica aqui de graça
+    // o Spring Boot cria aqui sozinho
 }

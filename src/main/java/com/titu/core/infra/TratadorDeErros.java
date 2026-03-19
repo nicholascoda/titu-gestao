@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
 
-@RestControllerAdvice // Isso diz: "Eu escuto os erros de todos os Controllers"
+@RestControllerAdvice // Mostra pro Spring que aqui que escuta os erros de todos os Controllers
 public class TratadorDeErros {
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -21,7 +21,7 @@ public class TratadorDeErros {
     public ResponseEntity tratarErro400(MethodArgumentNotValidException ex) {
         List<FieldError> erros = ex.getFieldErrors();
 
-        // Transforma o erro feio do Java numa lista bonitinha só com Campo e Mensagem
+        // Transforma o erro feio do Java numa lista só com Campo e Mensagem
         return ResponseEntity.badRequest().body(erros.stream().map(DadosErroValidacao::new).toList());
     }
 
@@ -32,7 +32,7 @@ public class TratadorDeErros {
         }
     }
 
-    // Captura nossos erros de regra de negócio (ex: email duplicado)
+    // Captura erros de regra de negócio (ex: email duplicado)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity tratarErroRegraNegocio(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());

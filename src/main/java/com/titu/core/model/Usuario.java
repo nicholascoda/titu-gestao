@@ -19,12 +19,11 @@ public class Usuario {
     private String nome;
 
     @Column(nullable = false, unique = true)
-    private String email; // Vamos usar o e-mail para fazer o login!
+    private String email; // Email que é usado pra fazer o login
 
     @Column(nullable = false)
     private String senha;
 
-    // Regra de acesso (Ex: "ROLE_ADMIN" ou "ROLE_USER")
     @Column(nullable = false)
     private String role;
 }

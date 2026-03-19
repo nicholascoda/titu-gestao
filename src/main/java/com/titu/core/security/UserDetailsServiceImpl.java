@@ -17,11 +17,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // 1. Busca no nosso banco pelo e-mail
+        // 1. busca no nosso banco pelo e-mail
         Usuario usuario = repository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
 
-        // 2. Traduz pro formato do Spring Security
+        // 2. traduz pro formato do Spring Security
         return User.builder()
                 .username(usuario.getEmail())
                 .password(usuario.getSenha())

@@ -43,30 +43,31 @@ public class WebController {
 
     @GetMapping("/")
     public String home(@RequestParam(required = false) String mesBusca, Model model) {
-        // 1. Se o usuário não escolheu nenhum mês, pegamos o mês atual (Ex: 2026-03)
+        // 1. Se o usuário não escolheu nenhum mês, pega o mês atual
         if (mesBusca == null || mesBusca.isEmpty()) {
             mesBusca = java.time.YearMonth.now().toString();
         }
 
-        // 2. Mandamos para o HTML qual mês está selecionado para o calendário preencher certo
+        // 2. Manda para o HTML qual mês está selecionado para o calendário preencher certo
         model.addAttribute("mesSelecionado", mesBusca);
 
-        // 3. Calculamos o início e o fim do mês (Já deixando engatilhado para filtrarmos o banco!)
+        // 3. Calcula o início e o fim do mês (Já deixando engatilhado para filtrar o banco)
         java.time.YearMonth anoMes = java.time.YearMonth.parse(mesBusca);
         java.time.LocalDate inicioDoMes = anoMes.atDay(1);
         java.time.LocalDate fimDoMes = anoMes.atEndOfMonth();
 
         // -------------------------------------------------------------------------
+
         Double pendenteMes = tituloRepository.somarTotalPendentePorPeriodo(inicioDoMes, fimDoMes);
         Double pagoMes = tituloRepository.somarTotalPagoPorPeriodo(inicioDoMes, fimDoMes);
         Long vencidosMes = tituloRepository.contarVencidosPorPeriodo(inicioDoMes, fimDoMes);
 
-        // Se o banco não achar nada no mês, ele devolve nulo. Isso evita dar erro na tela!
+        // Se o banco não achar nada no mês, ele devolve nulo para evitar dar erro na tela
         model.addAttribute("totalPendente", pendenteMes != null ? pendenteMes : 0.0);
         model.addAttribute("totalPago", pagoMes != null ? pagoMes : 0.0);
         model.addAttribute("qtdVencidos", vencidosMes != null ? vencidosMes : 0L);
 
-        // A quantidade de clientes eu mantive o total global, pois a carteira de clientes não zera todo mês!
+
         model.addAttribute("qtdClientes", clienteService.listarTodos().size());
 
         model.addAttribute("ultimosDisparos", logDisparoRepository.findTop5ByOrderByDataHoraEnvioDesc());
@@ -78,7 +79,7 @@ public class WebController {
     @GetMapping("/clientes")
     public String paginaClientes(Model model) {
         model.addAttribute("clientes", clienteService.listarTodos());
-        // Enviamos um objeto vazio para o formulário poder validar os campos
+        // Envia um objeto vazio para o formulário poder validar os campos
         model.addAttribute("cliente", new Cliente());
         return "clientes";
     }
@@ -93,7 +94,7 @@ public class WebController {
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Cliente salvo com sucesso!");
 
         } catch (IllegalArgumentException e) {
-            // Se o Service reclamar (ex: E-mail já existe), mostra erro vermelho!
+            // Se o Service reclamar (ex: E-mail já existe), mostra erro vermelho
             redirectAttributes.addFlashAttribute("mensagemErro", "Atenção: " + e.getMessage());
 
         } catch (Exception e) {
@@ -107,13 +108,13 @@ public class WebController {
     @GetMapping("/titulos")
     @Transactional
     public String paginaTitulos(@RequestParam(required = false) String filtro, Model model) {
-        // Agora chamamos o metodo com filtro
+        // chama o metodo com filtro
         List<Titulo> lista = tituloService.listarComFiltro(filtro);
 
         model.addAttribute("titulos", lista);
         model.addAttribute("clientes", clienteService.listarTodos());
 
-        // Passamos o filtro de volta pra tela (pra saber o que está vendo)
+        // Passa o filtro de volta pra tela (pra saber o que está vendo)
         model.addAttribute("filtroAtivo", filtro);
 
         return "titulos";
@@ -133,10 +134,10 @@ public class WebController {
     public String excluirCliente(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             clienteService.excluir(id);
-            // Mensagem de sucesso (opcional, mas legal)
+            // Mensagem de sucesso
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Cliente excluído com sucesso!");
         } catch (DataIntegrityViolationException e) {
-            // AQUI É O PULO DO GATO: Se der erro de chave estrangeira (tem dívidas)
+            // Se der erro de chave estrangeira, tem dívidas
             redirectAttributes.addFlashAttribute("mensagemErro", "Não é possível excluir: Este cliente possui cobranças vinculadas! Apague as cobranças primeiro.");
         } catch (Exception e) {
             // Qualquer outro erro genérico
@@ -170,7 +171,7 @@ public class WebController {
         tituloService.darBaixa(id);
         redirectAttributes.addFlashAttribute("mensagemSucesso", "Pagamento confirmado com sucesso!");
 
-        // 2. O PULO DO GATO: Pegar a URL exata de onde o clique veio (com os filtros!)
+        // 2. Pegar a URL exata de onde o clique veio, com os filtros
         String urlAnterior = request.getHeader("Referer");
 
         // 3. Redirecionar de volta. Se por acaso a URL sumir, ele volta pro padrão.
@@ -183,12 +184,12 @@ public class WebController {
 
     @GetMapping("/titulos/editar/{id}")
     public String editarTitulo(@PathVariable Long id, Model model) {
-        Titulo titulo = tituloService.buscarPorId(id); // Você precisará criar esse metodo no Service se não tiver
+        Titulo titulo = tituloService.buscarPorId(id);
 
         model.addAttribute("titulo", titulo);
-        model.addAttribute("clientes", clienteService.listarTodos()); // Precisa da lista pro Select
+        model.addAttribute("clientes", clienteService.listarTodos());
 
-        return "titulo-editar"; // Vamos criar esse HTML agora
+        return "titulo-editar"; //
     }
 
     @GetMapping("/suporte")
@@ -205,7 +206,7 @@ public class WebController {
         // Busca as dívidas ordenadas (Pendente primeiro)
         model.addAttribute("titulos", tituloService.listarPorCliente(id));
 
-        // NOVA LINHA: Busca o histórico da Caixa Preta do Titu-Bô
+        // Busca o histórico da Caixa Preta do Titu-Bô
         model.addAttribute("historicoEmails", logDisparoRepository.findByClienteIdOrderByDataHoraEnvioDesc(id));
 
         return "cliente-detalhes";
@@ -213,7 +214,7 @@ public class WebController {
 
     @GetMapping("/configuracoes")
     public String paginaConfiguracoes(Model model) {
-        // Pega a configuração atual (se não existir, ele cria a DEFAULT na hora!)
+        // Pega a configuração atual. Se não existir, ele cria a DEFAULT na hora
         com.titu.core.model.ConfiguracaoRobo configRobo = configuracaoService.obterConfiguracaoAtual();
 
         // Manda pro HTML
@@ -230,7 +231,6 @@ public class WebController {
     @GetMapping("/titulos/estornar/{id}")
     public String estornarPagamento(@PathVariable Long id) {
         // 1. Busca o título pelo ID
-        // (Assumindo que você tem o tituloRepository injetado no WebController)
         com.titu.core.model.Titulo titulo = tituloRepository.findById(id).orElse(null);
 
         if (titulo != null) {
@@ -249,7 +249,6 @@ public class WebController {
     @PostMapping("/perfil/atualizar")
     public String atualizarPerfil(String nome, String senha, RedirectAttributes redirectAttributes) {
 
-        // (No futuro: Lógica para ir no banco de dados e mudar o nome/senha de verdade)
 
         redirectAttributes.addFlashAttribute("mensagemSucesso", "Perfil atualizado com sucesso!");
         return "redirect:/configuracoes";
@@ -257,7 +256,7 @@ public class WebController {
     // --- 3. ROTA PARA SALVAR A EMPRESA ---
     @PostMapping("/configuracoes/empresa/salvar")
     public String salvarEmpresa(String nomeFantasia, String cnpj, String telefone, String email, RedirectAttributes redirectAttributes) {
-        // ... lógica de salvar ...
+
         redirectAttributes.addFlashAttribute("mensagemSucesso", "Dados da empresa atualizados com sucesso!");
         redirectAttributes.addFlashAttribute("abaAtiva", "empresa");
         return "redirect:/configuracoes";
@@ -266,7 +265,6 @@ public class WebController {
     @PostMapping("/configuracoes/automacoes/salvar")
     public String salvarAutomacoes(com.titu.core.model.ConfiguracaoRobo formRobo, RedirectAttributes redirectAttributes) {
 
-        // Pegamos a configuração que já está no banco para não perder o ID
         com.titu.core.model.ConfiguracaoRobo configAtual = configuracaoService.obterConfiguracaoAtual();
         formRobo.setId(configAtual.getId());
 

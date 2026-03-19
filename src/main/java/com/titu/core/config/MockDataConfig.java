@@ -27,7 +27,7 @@ public class MockDataConfig implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        // Só injeta os dados se a tabela de clientes estiver vazia!
+        // Só injeta os dados se a tabela de clientes estiver vazia
         if (clienteRepository.count() == 0) {
             System.out.println("🌱 [DEV] Populando banco de dados com dados fictícios para demonstração...");
 
@@ -38,7 +38,7 @@ public class MockDataConfig implements CommandLineRunner {
 
             clienteRepository.saveAll(Arrays.asList(c1, c2, c3));
 
-            // 2. Criando Títulos (Pagos, Pendentes e Atrasados) para gerar o Gráfico!
+            // 2. Criando Títulos (Pagos, Pendentes e Atrasados) para gerar o Gráfico
             // Pagos mês atual
             Titulo t1 = Titulo.builder().cliente(c1).descricao("Manutenção Servidor").valorOriginal(new BigDecimal("1500.00")).dataVencimento(LocalDate.now().minusDays(10)).status(StatusTitulo.PAGO).dataPagamento(LocalDate.now().minusDays(9)).build();
             Titulo t2 = Titulo.builder().cliente(c2).descricao("Campanha Marketing").valorOriginal(new BigDecimal("3200.00")).dataVencimento(LocalDate.now().minusDays(5)).status(StatusTitulo.PAGO).dataPagamento(LocalDate.now().minusDays(5)).build();

@@ -37,7 +37,7 @@ public class Titulo {
     @NotNull
     private StatusTitulo status;
 
-    private String descricao; // Ex: "Consultoria Jan/26"
+    private String descricao;
 
     // Controle de versão para evitar conflito de edição
     @Version

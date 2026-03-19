@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    // O Security vai usar esse metodo para achar quem está tentando logar
+    // O Security usa esse metodo para achar quem está tentando logar
     Optional<Usuario> findByEmail(String email);
 
 }

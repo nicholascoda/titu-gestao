@@ -17,16 +17,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor // <-- Isto cria o construtor automaticamente para injetarmos o repositório
+@RequiredArgsConstructor // <-- cria o construtor automaticamente para injetarmos o repositório
 public class RoboDeCobranca {
 
-    // O Robô precisa de acesso à base de dados e aos serviços
     private final TituloRepository tituloRepository;
     private final EmailService emailService;
     private final ConfiguracaoService configuracaoService; // <-- Lê as chavinhas do banco
     private final com.titu.core.repository.LogDisparoRepository logDisparoRepository; // <-- O Caderninho de anotações!
 
-    // Mantemos a cada 1 minuto ("0 * * * * *") APENAS PARA TESTES!
+    // a cada 1 minuto ("0 * * * * *") APENAS PARA TESTES!
     @Transactional
     @Scheduled(cron = "0 * * * * *")
     public void executarRotinaDiaria() {

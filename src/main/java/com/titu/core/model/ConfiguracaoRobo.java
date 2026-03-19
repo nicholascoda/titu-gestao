@@ -12,11 +12,11 @@ public class ConfiguracaoRobo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // As Chavinhas (Por padrão, já nascem ligadas = true)
+    // Os Toggles por padrão, já nascem ligadas = true
     private boolean preventivoAtivo = true;
     private boolean vencimentoAtivo = true;
     private boolean atrasoAtivo = true;
 
-    // Tom da Mensagem (Por padrão, nasce MEDIO)
+    // Tom da Mensagem por padrão, nasce MEDIO
     private String tomMensagem = "MEDIO"; // Opções que usaremos: FORMAL, MEDIO, INFORMAL
 }

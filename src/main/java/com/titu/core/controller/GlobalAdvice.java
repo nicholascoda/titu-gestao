@@ -14,7 +14,7 @@ public class GlobalAdvice {
 
     private final UsuarioRepository repository;
 
-    // Esse método roda antes de qualquer tela do sistema ser aberta!
+    // Esse metodo roda antes de qualquer tela do sistema ser aberta!
     @ModelAttribute("usuarioLogado")
     public Usuario adicionarUsuarioLogado(Principal principal) {
         if (principal != null) {

@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    // O Spring cria o SQL sozinho baseado nesses nomes:
+    // o Spring cria o SQL sozinho
     boolean existsByEmail(String email);
     boolean existsByCnpj(String cnpj);
 

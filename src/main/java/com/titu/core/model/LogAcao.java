@@ -18,9 +18,9 @@ public class LogAcao {
 
     private LocalDateTime dataHora;
 
-    private String usuario; // Ex: "Admin" (No futuro puxamos de quem logou)
+    private String usuario;
 
     private String acao; // Ex: "CRIAR", "PAGAR", "EXCLUIR", "EDITAR"
 
-    private String descricao; // Ex: "Pagou o título #12 do cliente Growth"
+    private String descricao;
 }

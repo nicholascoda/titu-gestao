@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@Builder // <-- A mágica acontece aqui!
-@NoArgsConstructor // <-- Obrigatório para o banco de dados (JPA)
-@AllArgsConstructor // <-- Obrigatório para o Builder funcionar
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "logs_disparos")
 public class LogDisparo {

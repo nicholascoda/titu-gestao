@@ -16,13 +16,12 @@ public class ConfiguracaoService {
     public ConfiguracaoRobo obterConfiguracaoAtual() {
         List<ConfiguracaoRobo> configs = repository.findAll();
 
-        // Se o banco estiver vazio, cria o DEFAULT na hora!
+        // se o banco estiver vazio, cria o DEFAULT na hora
         if (configs.isEmpty()) {
             ConfiguracaoRobo padrao = new ConfiguracaoRobo();
             return repository.save(padrao);
         }
 
-        // Como só teremos 1 configuração global, pegamos a primeira da lista
         return configs.get(0);
     }
 

@@ -36,24 +36,23 @@ public class Cliente {
     private String cnpj;
 
 // ==========================================
-    // 🤖 CONFIGURAÇÕES VIP DO ROBÔ DE COBRANÇA
+    // 🤖 CONFIGURAÇÕES DO ROBÔ DE COBRANÇA
     // ==========================================
 
     @Builder.Default
-    private Boolean usarRegrasGlobais = true; // Mudou para Boolean (maiúsculo)
+    private Boolean usarRegrasGlobais = true; // Mudou para Boolean (maiúsculo), que aceita o null tambem.
 
     @Builder.Default
-    private Boolean preventivoAtivo = true; // Mudou para Boolean (maiúsculo)
+    private Boolean preventivoAtivo = true;
 
     @Builder.Default
-    private Boolean vencimentoAtivo = true; // Mudou para Boolean (maiúsculo)
+    private Boolean vencimentoAtivo = true;
 
     @Builder.Default
-    private Boolean atrasoAtivo = true; // Mudou para Boolean (maiúsculo)
+    private Boolean atrasoAtivo = true;
 
     @Builder.Default
     private String tomMensagem = "MEDIO";
-    // ==========================================
 
     @Column(updatable = false)
     private LocalDateTime dataCadastro;

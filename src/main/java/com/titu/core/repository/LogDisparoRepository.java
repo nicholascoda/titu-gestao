@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface LogDisparoRepository extends JpaRepository<LogDisparo, Long> {
 
-    // A Mágica: Traz o histórico de um cliente específico, ordenado do mais novo pro mais velho!
+    // traz o histórico de um cliente específico, ordenado do mais novo pro mais velho
     List<LogDisparo> findByClienteIdOrderByDataHoraEnvioDesc(Long clienteId);
 
-    // Traz apenas os 5 últimos disparos do robô, do mais novo pro mais velho
+    // traz apenas os 5 últimos disparos do robô, do mais novo pro mais velho
     List<com.titu.core.model.LogDisparo> findTop5ByOrderByDataHoraEnvioDesc();
 }

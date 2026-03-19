@@ -3,6 +3,7 @@ package com.titu.core.service;
 import com.titu.core.model.LogAcao;
 import com.titu.core.repository.LogAcaoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,15 +14,25 @@ public class LogAcaoService {
 
     private final LogAcaoRepository repository;
 
-    // Esse é o metodo que vamos chamar de outros lugares do sistema
     public void registrarAcao(String acao, String descricao) {
+
+        // 1. Pega o NOME DO USUÁRIO LOGADO
+        // Se não tiver ninguém logado fica um padrão "SISTEMA"
+        String nomeUsuarioLogado = "SISTEMA";
+
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            nomeUsuarioLogado = SecurityContextHolder.getContext().getAuthentication().getName();
+        }
+
+        // 2. Monta o Log com o Builder
         LogAcao log = LogAcao.builder()
                 .dataHora(LocalDateTime.now())
-                .usuario("Admin") // Quando tivermos a tela de login, a gente troca pelo nome real do usuário!
+                .usuario(nomeUsuarioLogado)
                 .acao(acao)
                 .descricao(descricao)
                 .build();
 
+        // 3. Salva no banco
         repository.save(log);
     }
 }

@@ -21,11 +21,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Libera as pastas de imagens, css e js para a tela de login não ficar feia
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll()
-                        // Qualquer outra tela do sistema exige login!
+                        // Qualquer outra tela do sistema exige login
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        // Dizemos qual é a nossa rota da tela de login bonitona
+                        // Dizemos qual é a nossa rota da tela de login
                         .loginPage("/login")
                         // Se o login der certo, manda pro Dashboard
                         .defaultSuccessUrl("/", true)
@@ -40,13 +40,13 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // O encriptador de senhas (padrão de mercado BCrypt)
+    // encriptador de senhas (padrão de mercado BCrypt)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // --- O PULO DO GATO: CRIANDO O SEU USUÁRIO MESTRE ---
+    // CRIANDO O SEU USUÁRIO MESTRE ---
     // Esse código roda sozinho quando o sistema liga. Se não tiver ninguém no banco, ele te cadastra!
     @Bean
     public CommandLineRunner initData(UsuarioRepository repository, PasswordEncoder passwordEncoder) {
@@ -55,7 +55,7 @@ public class SecurityConfig {
                 Usuario admin = Usuario.builder()
                         .nome("Nicholas")
                         .email("admin@titu.com")
-                        .senha(passwordEncoder.encode("123456")) // A senha é 123456, mas salva criptografada!
+                        .senha(passwordEncoder.encode("123456")) // salva criptografada
                         .role("ADMIN")
                         .build();
                 repository.save(admin);

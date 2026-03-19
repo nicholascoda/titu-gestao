@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController // Avisa pro Spring: "Eu sou uma API REST"
+@RestController
 @RequestMapping("/api/clientes") // O endereço base será http://localhost:8080/clientes
 @RequiredArgsConstructor
 public class ClienteController {
@@ -19,7 +19,7 @@ public class ClienteController {
 
     @PostMapping
     public ResponseEntity<Cliente> criar(@RequestBody @Valid Cliente cliente) {
-        System.out.println("🚨 OPA! O CONTROLLER RODOU! Email: " + cliente.getEmail()); // <--- COLOCA ISSO
+        System.out.println("🚨 CONTROLLER RODOU! Email: " + cliente.getEmail());
 
         Cliente novoCliente = service.salvar(cliente);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoCliente);

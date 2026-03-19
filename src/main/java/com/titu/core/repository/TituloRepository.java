@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface TituloRepository extends JpaRepository<Titulo, Long> {
 
-    // Para buscar tudo que vence hoje e ainda não foi pago (pro Robô usar depois)
+    // Para buscar tudo que vence hoje e ainda não foi pago
     List<Titulo> findByDataVencimentoLessThanEqualAndStatus(LocalDate dataVencimento, StatusTitulo status);
 
     // Para listar as dívidas de um cliente específico

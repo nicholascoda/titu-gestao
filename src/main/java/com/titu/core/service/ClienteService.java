@@ -10,7 +10,7 @@ import com.titu.core.service.LogAcaoService;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor // O Lombok cria o construtor pra injetar o Repository
+@RequiredArgsConstructor
 public class ClienteService {
 
     private final ClienteRepository repository;
@@ -19,11 +19,11 @@ public class ClienteService {
     @Transactional // Garante que ou salva tudo ou não salva nada (Rollback)
     public Cliente salvar(Cliente cliente) {
 
-        // --- 0. DESCOBRIR A AÇÃO (O que resolve o erro vermelho!) ---
+        // 0. DESCOBRIR A AÇÃO
         // Se o ID for null, é um cliente novo. Se já tiver ID, é uma edição.
         String acao = (cliente.getId() == null) ? "CRIAR" : "EDITAR";
 
-        // --- 1. FAXINA (Limpeza de formatação antes de tudo) ---
+        // 1. limpeza de formatação
         if (cliente.getCnpj() != null && !cliente.getCnpj().isBlank()) {
             String cnpjLimpo = cliente.getCnpj().replaceAll("\\D", "");
             cliente.setCnpj(cnpjLimpo);
@@ -34,8 +34,8 @@ public class ClienteService {
             cliente.setTelefone(telefoneLimpo);
         }
 
-        // --- 2. VALIDAÇÕES ---
-        // Regra 1: Não pode duplicar E-mail (Mas permite se for o próprio cliente editando)
+        // 2. VALIDAÇÕES
+        // regra 1: não pode duplicar E-mail (mas permite se for o próprio cliente editando)
         java.util.Optional<Cliente> clientePorEmail = repository.findByEmail(cliente.getEmail());
         if (clientePorEmail.isPresent() && !clientePorEmail.get().getId().equals(cliente.getId())) {
             throw new IllegalArgumentException("Já existe um cliente cadastrado com este e-mail.");

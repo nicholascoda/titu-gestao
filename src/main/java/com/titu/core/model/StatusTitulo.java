@@ -1,8 +1,7 @@
 package com.titu.core.model;
 
 public enum StatusTitulo {
-    //Isso blinda seu sistema. Ninguém vai poder escrever "Pago" ou "pagou" errado.
-    // Só aceita os valores que definirmos.
+    // Só aceita os valores que definirmos, nao vai ter erro de escreverem errado.
     PENDENTE,
     VENCIDO,
     PAGO,

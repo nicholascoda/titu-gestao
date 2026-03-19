@@ -20,11 +20,11 @@ public class CobrancaScheduler {
     private final EmailService emailService;
 
     @Scheduled(cron = "0 0 8 * * *") //
-    @Transactional // <--- A CURA DO ERRO "LAZY": Mantém a conexão aberta com o bancooo
+    @Transactional // mantém a conexão aberta com o banco
     public void verificarCobrancasDoDia() {
         LocalDate hoje = LocalDate.now();
 
-        // Agora busca quem venceu hoje OU antes
+        // busca quem venceu hoje OU antes
         List<Titulo> titulosVencendo = tituloRepository.findByDataVencimentoLessThanEqualAndStatus(hoje, StatusTitulo.PENDENTE);
 
         if(titulosVencendo.isEmpty()) {

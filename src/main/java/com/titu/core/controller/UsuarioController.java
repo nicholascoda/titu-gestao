@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class UsuarioController {
 
     private final UsuarioRepository repository;
-    // Trazemos a máquina de criptografar senhas!
+    //encriptografador de senhas do spring security
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping
     public String listarUsuarios(Model model) {
-        // Manda a lista de tdo mundo pro HTML
+        // Manda a lista de todos pro HTML
         model.addAttribute("usuarios", repository.findAll());
         return "usuarios";
     }
