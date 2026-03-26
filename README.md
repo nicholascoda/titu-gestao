@@ -1,7 +1,7 @@
 # 💸 Titu - Sistema de Gestão e Conciliação Financeira
 
 ## 🎯 O Projeto
-O Titu é uma plataforma backend desenvolvida para automatizar a gestão de cobranças, rateios e conciliação de títulos ("ratatás"). Criado com foco na resiliência da regra de negócio, o sistema calcula saldos devedores, gerencia múltiplos pagadores e lida com a complexidade de fusos horários e transações pendentes.
+O Titu é uma plataforma backend desenvolvida para automatizar a gestão de cobranças, e controle de inadimplência, com gráficos para facilitar a visualização. Criado com foco na resiliência da regra de negócio, o sistema calcula saldos devedores, gerencia múltiplos pagadores e transações pendentes.
 
 ## 🚀 Tecnologias e Arquitetura
 Este projeto foi construído aplicando princípios de **SOLID** e **Clean Code**, separando claramente as camadas de acesso a dados, regras de negócio e rotas da API.
