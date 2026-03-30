@@ -21,42 +21,62 @@ public class TituloService {
     private final LogAcaoService logService;
 
     @Transactional
-    public Titulo salvar(Titulo tituloForm, Long clienteId) {
+    public void salvar(Titulo tituloForm, Long clienteId, String tipoCobranca, java.math.BigDecimal valorInformado, Integer quantidade) {
         Cliente cliente = clienteService.buscarPorId(clienteId);
-        Titulo tituloFinal;
-
-        // 0. DESCOBRIR A AÇÃO
-        // Se já tem ID no formulário, é uma edição. Se não tem, é criação.
-        String acao = (tituloForm.getId() != null) ? "EDITAR" : "CRIAR";
 
         if (tituloForm.getId() != null) {
-            // EDITAR
-            tituloFinal = tituloRepository.findById(tituloForm.getId())
+            // ================= EDITAR =================
+            Titulo tituloFinal = tituloRepository.findById(tituloForm.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Título não encontrado"));
 
             tituloFinal.setDescricao(tituloForm.getDescricao());
             tituloFinal.setValorOriginal(tituloForm.getValorOriginal());
             tituloFinal.setDataVencimento(tituloForm.getDataVencimento());
             tituloFinal.setCliente(cliente);
+            tituloFinal.setObservacao(tituloForm.getObservacao());
+
+            if (tituloFinal.getStatus() == StatusTitulo.PAGO && tituloFinal.getDataPagamento() == null) {
+                tituloFinal.setDataPagamento(LocalDate.now());
+            }
+
+            tituloRepository.save(tituloFinal);
+            logService.registrarAcao("EDITAR", "Cobrança atualizada: " + tituloFinal.getDescricao());
 
         } else {
-            // CRIAR
-            tituloFinal = tituloForm;
-            tituloFinal.setCliente(cliente);
-            tituloFinal.setStatus(StatusTitulo.PENDENTE);
+            // ================= CRIAR (Motor Híbrido com BigDecimal) =================
+            int parcelas = (quantidade != null && quantidade > 0) ? quantidade : 1;
+
+            // Pega o valor da tela. Se for nulo, pega zero.
+            java.math.BigDecimal valorBase = (valorInformado != null) ? valorInformado :
+                    (tituloForm.getValorOriginal() != null ? tituloForm.getValorOriginal() : java.math.BigDecimal.ZERO);
+
+            java.math.BigDecimal valorPorBoleto = valorBase;
+
+            // Matemática financeira de verdade: divide e arredonda as casas decimais
+            if ("PARCELADA".equals(tipoCobranca)) {
+                valorPorBoleto = valorBase.divide(new java.math.BigDecimal(parcelas), 2, java.math.RoundingMode.HALF_UP);
+            }
+
+            for (int i = 0; i < parcelas; i++) {
+                Titulo novaParcela = new Titulo();
+                novaParcela.setCliente(cliente);
+
+                String sufixo = (parcelas > 1) ? " (" + (i + 1) + "/" + parcelas + ")" : "";
+                novaParcela.setDescricao(tituloForm.getDescricao() + sufixo);
+
+                // Agora o Java aceita sem reclamar!
+                novaParcela.setValorOriginal(valorPorBoleto);
+
+                novaParcela.setDataVencimento(tituloForm.getDataVencimento().plusMonths(i));
+                novaParcela.setObservacao(tituloForm.getObservacao());
+                novaParcela.setStatus(StatusTitulo.PENDENTE);
+
+                tituloRepository.save(novaParcela);
+            }
+
+            String msgLog = (parcelas > 1) ? " gerados em lote" : " gerado";
+            logService.registrarAcao("CRIAR", parcelas + " títulos" + msgLog + " para " + cliente.getNomeEmpresa() + " - " + tituloForm.getDescricao());
         }
-
-        if (tituloFinal.getStatus() == StatusTitulo.PAGO && tituloFinal.getDataPagamento() == null) {
-            tituloFinal.setDataPagamento(LocalDate.now());
-        }
-
-        // 1. SALVAR NO BANCO
-        Titulo tituloSalvo = tituloRepository.save(tituloFinal);
-
-        // 2. GRAVAR O LOG
-        logService.registrarAcao(acao, "Cobrança de R$ " + tituloSalvo.getValorOriginal() + " (" + tituloSalvo.getDescricao() + ") para " + cliente.getNomeEmpresa());
-
-        return tituloSalvo;
     }
 
     public List<Titulo> listarTodos() {

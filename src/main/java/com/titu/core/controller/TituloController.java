@@ -16,18 +16,18 @@ public class TituloController {
     private final TituloService service;
 
     @PostMapping
-    public ResponseEntity<Titulo> criar(@RequestBody TituloDTO dados) {
+    public ResponseEntity<Void> criar(@RequestBody TituloDTO dados) {
         Titulo novoTitulo = new Titulo();
         novoTitulo.setValorOriginal(dados.valor());
         novoTitulo.setDataVencimento(dados.dataVencimento());
         novoTitulo.setDescricao(dados.descricao());
-        novoTitulo.setStatus(dados.status()); // Passando o status (pode ser null)
+        novoTitulo.setStatus(dados.status());
 
-        Titulo tituloSalvo = service.salvar(novoTitulo, dados.clienteId());
+        // Agora o Controller também fala em BigDecimal, alinhado com o Service!
+        java.math.BigDecimal valorConvertido = dados.valor() != null ? dados.valor() : java.math.BigDecimal.ZERO;
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(tituloSalvo);
+        service.salvar(novoTitulo, dados.clienteId(), "UNICA", valorConvertido, 1);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-
-
-
 }

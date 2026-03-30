@@ -39,6 +39,9 @@ public class Titulo {
 
     private String descricao;
 
+    @Column(name = "observacao", columnDefinition = "TEXT")
+    private String observacao;
+
     // Controle de versão para evitar conflito de edição
     @Version
     private Long version;

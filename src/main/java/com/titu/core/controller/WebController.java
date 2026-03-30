@@ -120,11 +120,14 @@ public class WebController {
         return "titulos";
     }
 
-    // ROTA PARA SALVAR (Vem do Formulário)
     @PostMapping("/titulos/salvar")
-    public String salvarTitulo(Titulo titulo, Long clienteId) {
-        // Mudou de .criarNovoTitulo(...) para .salvar(...)
-        tituloService.salvar(titulo, clienteId);
+    public String salvarTitulo(Titulo titulo,
+                               @RequestParam Long clienteId,
+                               @RequestParam(required = false, defaultValue = "UNICA") String tipoCobranca,
+                               @RequestParam(required = false) java.math.BigDecimal valorInformado, // <-- MUDOU AQUI
+                               @RequestParam(required = false, defaultValue = "1") Integer quantidade) {
+
+        tituloService.salvar(titulo, clienteId, tipoCobranca, valorInformado, quantidade);
         return "redirect:/titulos";
     }
 

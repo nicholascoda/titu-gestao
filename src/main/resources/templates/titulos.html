@@ -91,11 +91,23 @@
                                         <i class="fas fa-check"></i>
                                     </button>
 
+                                    <button type="button" class="btn btn-sm btn-primary" title="Visualizar Detalhes"
+                                            data-toggle="modal"
+                                            data-target="#modal-visualizar-titulo"
+                                            th:data-descricao="${titulo.descricao}"
+                                            th:data-observacao="${titulo.observacao}"
+                                            th:data-valor="${titulo.valorOriginal}"
+                                            th:data-vencimento="${titulo.dataVencimento}"
+                                            th:data-cliente-nome="${titulo.cliente != null ? titulo.cliente.nomeEmpresa : 'Cliente Removido'}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+
                                     <button type="button" class="btn btn-sm btn-info" title="Editar"
                                             data-toggle="modal"
                                             data-target="#modal-editar-titulo"
                                             th:data-id="${titulo.id}"
                                             th:data-descricao="${titulo.descricao}"
+                                            th:data-observacao="${titulo.observacao}"
                                             th:data-valor="${titulo.valorOriginal}"
                                             th:data-vencimento="${titulo.dataVencimento}"
                                             th:data-cliente-id="${titulo.cliente != null ? titulo.cliente.id : ''}"
@@ -132,16 +144,75 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Cliente</label>
+                        <label style="width: 100%;">
+                            Cliente
+                            <a href="/clientes?novo=true" target="_blank" class="badge badge-success float-right">
+                                <i class="fas fa-plus"></i> Novo Cliente
+                            </a>
+                        </label>
                         <select name="clienteId" class="form-control select2" style="width: 100%;" required>
                             <option value="">Selecione um cliente...</option>
                             <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nomeEmpresa}"></option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Descrição</label><input type="text" name="descricao" class="form-control" required></div>
-                    <div class="row">
-                        <div class="col-6"><div class="form-group"><label>Valor (R$)</label><input type="number" step="0.01" name="valorOriginal" class="form-control" required></div></div>
-                        <div class="col-6"><div class="form-group"><label>Vencimento</label><input type="date" name="dataVencimento" class="form-control" required></div></div>
+
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" name="descricao" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Informações Adicionais (Opcional)</label>
+                        <textarea name="observacao" class="form-control" rows="2" placeholder="Detalhes extras sobre esta cobrança..."></textarea>
+                    </div>
+
+                    <hr>
+                    <h6 class="font-weight-bold text-secondary">Configuração Financeira</h6>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="tipoUnica" name="tipoCobranca" class="custom-control-input" value="UNICA" checked>
+                            <label class="custom-control-label" for="tipoUnica">À Vista / Parcela Única</label>
+                        </div>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="tipoParcelada" name="tipoCobranca" class="custom-control-input" value="PARCELADA">
+                            <label class="custom-control-label" for="tipoParcelada">Parcelar Valor Total</label>
+                        </div>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="tipoRecorrente" name="tipoCobranca" class="custom-control-input" value="RECORRENTE">
+                            <label class="custom-control-label" for="tipoRecorrente">Assinatura Mensal (Repetir)</label>
+                        </div>
+                    </div>
+
+                    <div class="row bg-light p-3 rounded border">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label id="labelValorPrincipal">Valor Total (R$)</label>
+                                <input type="number" step="0.01" id="inputValorPrincipal" name="valorInformado" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label id="labelQuantidade">Parcelas</label>
+                                <select id="inputQuantidade" name="quantidade" class="form-control" disabled>
+                                    <option value="1">1x</option>
+                                    <option value="2">2x</option>
+                                    <option value="3">3x</option>
+                                    <option value="4">4x</option>
+                                    <option value="5">5x</option>
+                                    <option value="6">6x</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>1º Vencimento</label>
+                                <input type="date" name="dataVencimento" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="resumoFinanceiro" class="alert alert-info mt-2 text-center" style="display: none;">
                     </div>
                 </div>
                 <div class="modal-footer justify-content-between">
@@ -161,6 +232,10 @@
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
+                    <div id="alerta-parcela" class="alert alert-warning text-sm" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Aviso:</strong> Esta é uma cobrança parcelada <span id="info-parcela-badge" class="badge badge-dark"></span>.
+                        Alterar o valor aqui afetará <strong>apenas esta parcela</strong>.
+                    </div>
 
                     <input type="hidden" id="edit-id" name="id">
                     <input type="hidden" id="edit-clienteId" name="clienteId">
@@ -175,17 +250,31 @@
                         <input type="text" id="edit-descricao" name="descricao" class="form-control" required>
                     </div>
 
+                    <div class="form-group">
+                        <label>Informações Adicionais</label>
+                        <textarea id="edit-observacao" name="observacao" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="m-0 font-weight-bold text-secondary">Dados Financeiros</h6>
+                        <button type="button" id="btn-destravar-edicao" class="btn btn-xs btn-danger">
+                            <i class="fas fa-unlock-alt"></i> Editar Valor/Data
+                        </button>
+                    </div>
+
                     <div class="row">
                         <div class="col-6">
                             <div class="form-group">
-                                <label>Valor (R$)</label>
-                                <input type="number" step="0.01" id="edit-valor" name="valorOriginal" class="form-control" required>
+                                <label id="label-edit-valor">Valor (R$)</label>
+                                <input type="number" step="0.01" id="edit-valor" name="valorOriginal" class="form-control" required readonly>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-group">
                                 <label>Vencimento</label>
-                                <input type="date" id="edit-vencimento" name="dataVencimento" class="form-control" required>
+                                <input type="date" id="edit-vencimento" name="dataVencimento" class="form-control" required readonly>
                             </div>
                         </div>
                     </div>
@@ -221,18 +310,119 @@
         $('.select2').select2({theme: 'bootstrap4', dropdownParent: $('#modal-novo-titulo')});
 
         // --- PREENCHER O MODAL EDITAR ---
+        // --- PREENCHER O MODAL EDITAR ---
+        // --- PREENCHER O MODAL EDITAR ---
         $('#modal-editar-titulo').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
-
             var modal = $(this);
+            var descricao = button.data('descricao');
+
+            // 1. Preenche os dados normais
             modal.find('#edit-id').val(button.data('id'));
-            modal.find('#edit-descricao').val(button.data('descricao'));
+            modal.find('#edit-descricao').val(descricao);
+            modal.find('#edit-observacao').val(button.data('observacao'));
             modal.find('#edit-valor').val(button.data('valor'));
             modal.find('#edit-vencimento').val(button.data('vencimento'));
             modal.find('#edit-clienteId').val(button.data('cliente-id'));
             modal.find('#edit-nomeCliente').val(button.data('cliente-nome'));
+
+            // 2. O Detetive de Parcelas (Procura padrão "(1/5)" no final do texto)
+            var regexParcela = /\((\d+\/\d+)\)$/;
+            var match = descricao.match(regexParcela);
+
+            if (match) {
+                // É uma parcela! Liga o painel amarelo.
+                $('#alerta-parcela').show();
+                $('#info-parcela-badge').text(match[1]); // Coloca "1/5" na etiqueta preta
+                $('#label-edit-valor').text('Valor DESTA Parcela (R$)').addClass('text-danger');
+            } else {
+                // É à vista! Esconde tudo.
+                $('#alerta-parcela').hide();
+                $('#label-edit-valor').text('Valor (R$)').removeClass('text-danger');
+            }
+
+            // 3. Trava o cadeado toda vez que o modal abre (reseta o estado)
+            $('#edit-valor, #edit-vencimento').prop('readonly', true).removeClass('border-danger');
+            $('#btn-destravar-edicao').show();
+        });
+
+        // --- BOTÃO DE DESTRAVAR O CADEADO ---
+        $('#btn-destravar-edicao').click(function() {
+            // Tira o readonly, bota borda vermelha pra assustar e esconde o botão
+            $('#edit-valor, #edit-vencimento').prop('readonly', false).addClass('border-danger');
+            $(this).hide();
         });
     });
 </script>
+<script>
+    $(document).ready(function() {
+        // Se a URL tiver o código secreto, abre o modal na marra
+        if (window.location.search.includes('novo=true')) {
+            $('#modal-novo-cliente').modal('show');
+            // Obs: Confirme se o ID do modal de cliente é esse mesmo!
+        }
+    });
+    // --- LÓGICA DE PARCELAMENTO E RECORRÊNCIA ---
+
+    // 1. Quando mudar o TIPO de cobrança (As bolinhas do Rádio) - Aqui a gente constrói as opções
+    $('input[name="tipoCobranca"]').on('change', function() {
+        var tipo = $(this).val();
+        var selectQtd = $('#inputQuantidade');
+
+        if (tipo === 'UNICA') {
+            selectQtd.prop('disabled', true).html('<option value="1">1x</option>');
+            $('#labelValorPrincipal').text('Valor da Cobrança (R$)');
+            $('#labelQuantidade').text('Parcelas');
+            $('#resumoFinanceiro').hide();
+        }
+        else if (tipo === 'PARCELADA') {
+            selectQtd.prop('disabled', false);
+            var options = '';
+            for(var i=2; i<=6; i++) { options += '<option value="'+i+'">'+i+'x</option>'; }
+            selectQtd.html(options);
+            $('#labelValorPrincipal').text('Valor TOTAL a dividir (R$)');
+            $('#labelQuantidade').text('Dividir em');
+        }
+        else if (tipo === 'RECORRENTE') {
+            selectQtd.prop('disabled', false);
+            var options = '';
+            for(var i=2; i<=30; i++) { options += '<option value="'+i+'">'+i+' meses</option>'; }
+            selectQtd.html(options);
+            $('#labelValorPrincipal').text('Valor MENSAL (R$)');
+            $('#labelQuantidade').text('Repetir por');
+        }
+
+        // Manda recalcular o resumo visual sempre que trocar o tipo
+        calcularResumo();
+    });
+
+    // 2. Quando digitar um valor ou trocar a quantidade - Apenas recalcula a matemática
+    $('#inputValorPrincipal, #inputQuantidade').on('change keyup', function() {
+        calcularResumo();
+    });
+
+    // 3. A Calculadora (Função isolada para não bugar a tela)
+    function calcularResumo() {
+        var tipo = $('input[name="tipoCobranca"]:checked').val();
+        var valor = parseFloat($('#inputValorPrincipal').val()) || 0;
+        var qtd = parseInt($('#inputQuantidade').val()) || 1;
+        var resumo = $('#resumoFinanceiro');
+
+        if (tipo === 'UNICA' || valor === 0) {
+            resumo.hide();
+            return;
+        }
+
+        if (tipo === 'PARCELADA') {
+            var valorParcela = (valor / qtd).toFixed(2);
+            resumo.show().html('O cliente pagará <strong>' + qtd + ' parcelas</strong> de <strong>R$ ' + valorParcela + '</strong>');
+        }
+        else if (tipo === 'RECORRENTE') {
+            var valorTotal = (valor * qtd).toFixed(2);
+            resumo.show().html('Serão geradas <strong>' + qtd + ' cobranças independentes</strong> de R$ ' + valor.toFixed(2) + ' (Totalizando R$ ' + valorTotal + ')');
+        }
+    }
+</script>
+
 </body>
 </html>
