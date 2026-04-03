@@ -91,13 +91,14 @@
                                         <i class="fas fa-check"></i>
                                     </button>
 
-                                    <button type="button" class="btn btn-sm btn-primary" title="Visualizar Detalhes"
+                                    <button type="button" class="btn btn-sm btn-primary btn-view-detalhes" title="Visualizar Detalhes"
                                             data-toggle="modal"
                                             data-target="#modal-visualizar-titulo"
                                             th:data-descricao="${titulo.descricao}"
                                             th:data-observacao="${titulo.observacao}"
                                             th:data-valor="${titulo.valorOriginal}"
                                             th:data-vencimento="${titulo.dataVencimento}"
+                                            th:data-status="${titulo.status.name()}"
                                             th:data-cliente-nome="${titulo.cliente != null ? titulo.cliente.nomeEmpresa : 'Cliente Removido'}">
                                         <i class="fas fa-eye"></i>
                                     </button>
@@ -118,7 +119,8 @@
                                     <a th:href="@{/titulos/excluir/{id}(id=${titulo.id})}"
                                        class="btn btn-sm btn-danger"
                                        title="Excluir"
-                                       onclick="return confirm('Tem certeza? Isso apaga o registro para sempre.');">
+                                       th:data-desc="${titulo.descricao}"
+                                       onclick="var isParcela = this.getAttribute('data-desc').match(/\(\d+\/\d+\)$/); return confirm(isParcela ? '⚠️ CUIDADO: Isso excluirá apenas ESTA parcela!\nAs outras continuarão ativas no sistema.\n\nConfirma a exclusão?' : 'Tem certeza? Isso apaga o registro para sempre.');">
                                         <i class="fas fa-trash"></i>
                                     </a>
 
@@ -172,41 +174,38 @@
                     <div class="form-group">
                         <div class="custom-control custom-radio custom-control-inline">
                             <input type="radio" id="tipoUnica" name="tipoCobranca" class="custom-control-input" value="UNICA" checked>
-                            <label class="custom-control-label" for="tipoUnica">À Vista / Parcela Única</label>
+                            <label class="custom-control-label" for="tipoUnica">À Vista</label>
                         </div>
                         <div class="custom-control custom-radio custom-control-inline">
                             <input type="radio" id="tipoParcelada" name="tipoCobranca" class="custom-control-input" value="PARCELADA">
-                            <label class="custom-control-label" for="tipoParcelada">Parcelar Valor Total</label>
+                            <label class="custom-control-label" for="tipoParcelada">Parcelar</label>
                         </div>
                         <div class="custom-control custom-radio custom-control-inline">
                             <input type="radio" id="tipoRecorrente" name="tipoCobranca" class="custom-control-input" value="RECORRENTE">
-                            <label class="custom-control-label" for="tipoRecorrente">Assinatura Mensal (Repetir)</label>
+                            <label class="custom-control-label" for="tipoRecorrente">Repetir Cobrança Mensal</label>
                         </div>
                     </div>
 
                     <div class="row bg-light p-3 rounded border">
-                        <div class="col-4">
+                        <div class="col-6" id="blocoValor">
                             <div class="form-group">
-                                <label id="labelValorPrincipal">Valor Total (R$)</label>
+                                <label id="labelValorPrincipal">Valor (R$)</label>
                                 <input type="number" step="0.01" id="inputValorPrincipal" name="valorInformado" class="form-control" required>
                             </div>
                         </div>
-                        <div class="col-4">
+
+                        <div class="col-4" id="blocoQuantidade" style="display: none;">
                             <div class="form-group">
                                 <label id="labelQuantidade">Parcelas</label>
-                                <select id="inputQuantidade" name="quantidade" class="form-control" disabled>
+                                <select id="inputQuantidade" name="quantidade" class="form-control">
                                     <option value="1">1x</option>
-                                    <option value="2">2x</option>
-                                    <option value="3">3x</option>
-                                    <option value="4">4x</option>
-                                    <option value="5">5x</option>
-                                    <option value="6">6x</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="col-4">
+
+                        <div class="col-6" id="blocoVencimento">
                             <div class="form-group">
-                                <label>1º Vencimento</label>
+                                <label id="labelVencimento">Vencimento</label>
                                 <input type="date" name="dataVencimento" class="form-control" required>
                             </div>
                         </div>
@@ -220,6 +219,75 @@
                     <button type="submit" class="btn btn-success">Lançar Dívida</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-visualizar-titulo">
+    <div class="modal-dialog">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-primary text-white">
+                <h4 class="modal-title"><i class="fas fa-search-dollar mr-2"></i> Detalhes da Cobrança</h4>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <label class="text-muted text-uppercase text-sm mb-0">Cliente</label>
+                        <h5 id="view-cliente" class="font-weight-bold border-bottom pb-2 text-dark"></h5>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="text-muted text-uppercase text-sm mb-0">Descrição</label>
+                        <p id="view-descricao" class="lead mb-2 text-dark"></p>
+                    </div>
+                </div>
+
+                <div class="row bg-light p-3 rounded border mb-3 mx-0">
+                    <div class="col-6 border-right">
+                        <label class="text-muted text-uppercase text-sm mb-0">Valor</label>
+                        <h4 id="view-valor" class="text-success font-weight-bold mb-0"></h4>
+                    </div>
+                    <div class="col-6 pl-4">
+                        <label class="text-muted text-uppercase text-sm mb-0">Vencimento</label>
+                        <h5 id="view-vencimento" class="mt-1 text-dark"></h5>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <label class="text-muted text-uppercase text-sm mb-0">Informações Adicionais</label>
+                        <div class="p-3 bg-light rounded border text-dark" style="min-height: 80px;">
+                            <span id="view-observacao"></span>
+                        </div>
+                        <div id="view-painel-parcelas" style="display: none;">
+                            <hr class="mt-4">
+                            <h6 class="font-weight-bold text-secondary mb-3">
+                                <i class="fas fa-layer-group"></i> Cronograma desta Dívida
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered text-sm text-center">
+                                    <thead class="bg-light">
+                                    <tr>
+                                        <th>Parcela</th>
+                                        <th>Vencimento</th>
+                                        <th>Valor</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="view-lista-parcelas">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-danger" id="btn-gerar-pdf">
+                    <i class="fas fa-file-pdf"></i> Baixar Fatura (PDF)
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -288,6 +356,62 @@
     </div>
 </div>
 
+<div id="invoice-template" style="display: none;">
+    <div style="width: 100%; box-sizing: border-box;">
+        <div style="border-bottom: 2px solid #3f6791; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="color: #3f6791; margin: 0; font-weight: bold; font-family: 'Inter', sans-serif;">Titu<span style="color: #333;">Gestão</span></h2>
+                <p style="margin: 5px 0 0 0; color: #555; font-size: 14px; font-family: Arial, sans-serif;">CNPJ: 00.000.000/0001-00</p>
+                <p style="margin: 0; color: #555; font-size: 14px; font-family: Arial, sans-serif;">Rio de Janeiro, RJ</p>
+            </div>
+            <div style="text-align: right;">
+                <h3 style="margin: 0; color: #333; text-transform: uppercase; font-weight: 800; font-family: Arial, sans-serif;">Recibo / Fatura</h3>
+                <p style="margin: 5px 0 0 0; color: #555; font-family: Arial, sans-serif;">Emissão: <span id="pdf-data-emissao"></span></p>
+                <p style="margin: 0; color: #555; font-family: Arial, sans-serif;">Cód: <strong id="pdf-codigo"></strong></p>
+            </div>
+        </div>
+
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px; border: 1px solid #dee2e6;">
+            <h5 style="margin-top: 0; margin-bottom: 10px; color: #3f6791; text-transform: uppercase; font-size: 14px; font-weight: bold; font-family: Arial, sans-serif;">Sacado / Cliente</h5>
+            <h4 id="pdf-cliente" style="margin: 0; color: #333; font-weight: bold; font-family: Arial, sans-serif;"></h4>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-family: Arial, sans-serif;">
+            <thead>
+            <tr style="background-color: #3f6791; color: white;">
+                <th style="padding: 12px; text-align: left; border: 1px solid #3f6791;">Descrição do Serviço / Cobrança</th>
+                <th style="padding: 12px; text-align: center; border: 1px solid #3f6791;">Vencimento</th>
+                <th style="padding: 12px; text-align: right; border: 1px solid #3f6791;">Valor (R$)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td id="pdf-descricao" style="padding: 15px 12px; text-align: left; font-size: 16px; border: 1px solid #dee2e6;"></td>
+                <td id="pdf-vencimento" style="padding: 15px 12px; text-align: center; font-size: 16px; border: 1px solid #dee2e6;"></td>
+                <td id="pdf-valor" style="padding: 15px 12px; text-align: right; font-weight: bold; font-size: 16px; border: 1px solid #dee2e6;"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 50px; font-family: Arial, sans-serif;">
+            <div style="width: 45%;">
+                <p style="color: #666; font-size: 12px; margin-bottom: 5px;">Observações:</p>
+                <p id="pdf-observacao" style="font-size: 13px; color: #333; padding: 10px; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;"></p>
+            </div>
+            <div style="width: 40%; text-align: right;">
+                <h5 style="margin: 0; color: #666; font-weight: normal;">Status da Fatura:</h5>
+                <h3 id="pdf-status" style="margin: 5px 0 20px 0; text-transform: uppercase;"></h3>
+
+                <div style="border-top: 1px solid #333; padding-top: 10px; margin-top: 40px; text-align: center;">
+                    <p style="margin: 0; font-size: 14px; color: #333; font-weight: bold;">Titu Gestão Financeira</p>
+                    <p style="margin: 0; font-size: 12px; color: #666;">Assinatura Digital</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <div th:replace="~{fragments/geral :: scripts}"></div>
 
 <script th:inline="none">
@@ -309,8 +433,6 @@
 
         $('.select2').select2({theme: 'bootstrap4', dropdownParent: $('#modal-novo-titulo')});
 
-        // --- PREENCHER O MODAL EDITAR ---
-        // --- PREENCHER O MODAL EDITAR ---
         // --- PREENCHER O MODAL EDITAR ---
         $('#modal-editar-titulo').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
@@ -364,32 +486,55 @@
     });
     // --- LÓGICA DE PARCELAMENTO E RECORRÊNCIA ---
 
-    // 1. Quando mudar o TIPO de cobrança (As bolinhas do Rádio) - Aqui a gente constrói as opções
+    // 1. Quando mudar o TIPO de cobrança (As bolinhas do Rádio) - Aqui a gente constrói o layout
     $('input[name="tipoCobranca"]').on('change', function() {
         var tipo = $(this).val();
         var selectQtd = $('#inputQuantidade');
+        var blocoQtd = $('#blocoQuantidade');
+        var blocoValor = $('#blocoValor');
+        var blocoVenc = $('#blocoVencimento');
+        var labelVenc = $('#labelVencimento');
 
         if (tipo === 'UNICA') {
-            selectQtd.prop('disabled', true).html('<option value="1">1x</option>');
-            $('#labelValorPrincipal').text('Valor da Cobrança (R$)');
-            $('#labelQuantidade').text('Parcelas');
+            // Esconde a quantidade e divide a tela no meio (col-6)
+            blocoQtd.hide();
+            blocoValor.removeClass('col-4').addClass('col-6');
+            blocoVenc.removeClass('col-4').addClass('col-6');
+
+            labelVenc.text('Vencimento');
+            $('#labelValorPrincipal').text('Valor (R$)');
             $('#resumoFinanceiro').hide();
+
+            // Mantém o valor "1" por baixo dos panos pro Java não reclamar
+            selectQtd.html('<option value="1">1x</option>');
         }
         else if (tipo === 'PARCELADA') {
-            selectQtd.prop('disabled', false);
+            // Mostra a quantidade e espreme a tela em 3 partes (col-4)
+            blocoQtd.show();
+            blocoValor.removeClass('col-6').addClass('col-4');
+            blocoVenc.removeClass('col-6').addClass('col-4');
+
+            labelVenc.text('1º Vencimento');
+            $('#labelValorPrincipal').text('Valor TOTAL');
+            $('#labelQuantidade').text('Dividir em');
+
             var options = '';
             for(var i=2; i<=6; i++) { options += '<option value="'+i+'">'+i+'x</option>'; }
             selectQtd.html(options);
-            $('#labelValorPrincipal').text('Valor TOTAL a dividir (R$)');
-            $('#labelQuantidade').text('Dividir em');
         }
         else if (tipo === 'RECORRENTE') {
-            selectQtd.prop('disabled', false);
+            // Mesma coisa do parcelado, mas com textos diferentes
+            blocoQtd.show();
+            blocoValor.removeClass('col-6').addClass('col-4');
+            blocoVenc.removeClass('col-6').addClass('col-4');
+
+            labelVenc.text('1º Vencimento');
+            $('#labelValorPrincipal').text('Valor MENSAL');
+            $('#labelQuantidade').text('Repetir por');
+
             var options = '';
             for(var i=2; i<=30; i++) { options += '<option value="'+i+'">'+i+' meses</option>'; }
             selectQtd.html(options);
-            $('#labelValorPrincipal').text('Valor MENSAL (R$)');
-            $('#labelQuantidade').text('Repetir por');
         }
 
         // Manda recalcular o resumo visual sempre que trocar o tipo
@@ -422,6 +567,201 @@
             resumo.show().html('Serão geradas <strong>' + qtd + ' cobranças independentes</strong> de R$ ' + valor.toFixed(2) + ' (Totalizando R$ ' + valorTotal + ')');
         }
     }
+    // --- PREENCHER O MODAL VISUALIZAR (OLHINHO) ---
+    $('#modal-visualizar-titulo').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var modal = $(this);
+
+        var cliente = button.data('cliente-nome');
+        var descricao = button.data('descricao');
+        var observacao = button.data('observacao');
+        var valor = button.data('valor');
+        var vencimento = button.data('vencimento');
+
+        // Formata a moeda e a data
+        var valorFormatado = parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        var dataFormatada = '-';
+        if (vencimento) {
+            var partes = vencimento.split('-');
+            if (partes.length === 3) dataFormatada = partes[2] + '/' + partes[1] + '/' + partes[0];
+        }
+
+        modal.find('#view-cliente').text(cliente);
+        modal.find('#view-descricao').text(descricao);
+        modal.find('#view-valor').text(valorFormatado);
+        modal.find('#view-vencimento').text(dataFormatada);
+
+        if (!observacao || observacao.trim() === '') {
+            modal.find('#view-observacao').html('<em class="text-muted">Nenhuma observação registrada.</em>');
+        } else {
+            modal.find('#view-observacao').text(observacao);
+        }
+
+// ================= MÁGICA DO RAIO-X DE PARCELAS =================
+        var painelParcelas = $('#view-painel-parcelas');
+        var tbParcelas = $('#view-lista-parcelas');
+        tbParcelas.empty(); // Limpa a tabela anterior
+
+        // Regex procura algo como "(1/4)" no final do nome
+        var regexParcelamento = /^(.*?)\s*\(\d+\/(\d+)\)$/;
+        var matchParcela = descricao.match(regexParcelamento);
+
+        if (matchParcela) {
+            painelParcelas.show(); // Acende a tabela
+            var nomeBase = matchParcela[1]; // Pega só o "Desenvolvimento de Site"
+            var totalParcelas = parseInt(matchParcela[2]); // Pega o número total (ex: o 4 do 1/4)
+            var parcelasEncontradas = [];
+
+            // O Detetive: Caça todos os botões de detalhes na tela inteira
+            $('.btn-view-detalhes').each(function() {
+                var btn = $(this);
+                var d = btn.data('descricao');
+                var c = btn.data('cliente-nome');
+
+                // Se for o mesmo cliente e o nome da dívida bater, bingo!
+                if (c === cliente && d.startsWith(nomeBase) && d.match(/\(\d+\/\d+\)$/)) {
+                    parcelasEncontradas.push({
+                        desc: d,
+                        venc: btn.data('vencimento'),
+                        val: btn.data('valor'),
+                        status: btn.data('status')
+                    });
+                }
+            });
+
+            // O VIDENTE: Descobre quem foi excluído matematicamente
+            for(var i = 1; i <= totalParcelas; i++) {
+                var nomeEsperado = nomeBase + " (" + i + "/" + totalParcelas + ")";
+                var achou = parcelasEncontradas.find(p => p.desc === nomeEsperado);
+
+                if (!achou) {
+                    // Injeta a parcela fantasma vermelha
+                    parcelasEncontradas.push({
+                        desc: nomeEsperado,
+                        venc: '-',
+                        val: 0,
+                        status: 'EXCLUIDA'
+                    });
+                }
+            }
+
+            // Ordena bonitinho pra ficar (1/4), (2/4), (3/4)
+            parcelasEncontradas.sort((a, b) => a.desc.localeCompare(b.desc));
+
+            // Desenha as linhas na tela
+            parcelasEncontradas.forEach(function(p) {
+                var dt = '-';
+                if (p.venc && p.venc !== '-') {
+                    var pts = p.venc.split('-');
+                    dt = pts[2] + '/' + pts[1] + '/' + pts[0];
+                }
+
+                var vl = '-';
+                var badge = '';
+                var trClass = '';
+
+                if (p.status === 'PAGO') {
+                    badge = '<span class="badge bg-success">Pago</span>';
+                    vl = parseFloat(p.val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                } else if (p.status === 'EXCLUIDA') {
+                    badge = '<span class="badge bg-danger"><i class="fas fa-times"></i> Excluída</span>';
+                    trClass = 'text-muted'; // Deixa a linha cinza apagadinha
+                    vl = '<span class="text-danger"><s>Cancelada</s></span>';
+                } else {
+                    badge = '<span class="badge bg-warning">Pendente</span>';
+                    vl = parseFloat(p.val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                }
+
+                // Destaca a linha da parcela que o cara clicou de verdade (se não for a excluída)
+                if (p.desc === descricao && p.status !== 'EXCLUIDA') {
+                    trClass = 'bg-primary text-white font-weight-bold';
+                }
+
+                tbParcelas.append('<tr class="'+trClass+'"><td>'+p.desc+'</td><td>'+dt+'</td><td>'+vl+'</td><td>'+badge+'</td></tr>');
+            });
+
+        } else {
+            painelParcelas.hide(); // Se não for parcelado, esconde a tabela
+        }
+    });
+
+    // --- GERAÇÃO DO PDF DA NOTA FISCAL (NATIVO E SELECIONÁVEL) ---
+    $('#btn-gerar-pdf').click(function() {
+        // 1. Pega os dados do modal
+        var cliente = $('#view-cliente').text();
+        var descricao = $('#view-descricao').text();
+        var valor = $('#view-valor').text();
+        var vencimento = $('#view-vencimento').text();
+        var observacao = $('#view-observacao').text();
+
+        var hoje = new Date();
+        var dataEmissao = hoje.toLocaleDateString('pt-BR');
+        var horaEmissao = hoje.toLocaleTimeString('pt-BR');
+        var codigo = 'TITU-' + Math.floor(Math.random() * 1000000);
+
+        // 2. Preenche o nosso template invisível
+        $('#pdf-cliente').text(cliente);
+        $('#pdf-descricao').text(descricao);
+        $('#pdf-valor').text(valor);
+        $('#pdf-vencimento').text(vencimento);
+        $('#pdf-observacao').text(observacao !== 'Nenhuma observação registrada.' ? observacao : 'Sem observações adicionais.');
+        $('#pdf-data-emissao').text(dataEmissao + ' às ' + horaEmissao);
+        $('#pdf-codigo').text(codigo);
+
+        var statusFatura = 'Pendente';
+        var corStatus = '#ffc107';
+        if ($('#view-lista-parcelas').html().includes('Pago') || $('#view-painel-parcelas').is(':hidden')) {
+            statusFatura = 'Válido / Emitido';
+            corStatus = '#28a745';
+        }
+        $('#pdf-status').text(statusFatura).css('color', corStatus);
+
+        // 3. A Mágica do PDF NATIVO (O texto fica copiável e perfeito no A4)
+        var conteudoFatura = document.getElementById('invoice-template').innerHTML;
+
+        // Cria uma janela invisível na memória
+        var janelaImpressao = window.open('', '', 'width=800,height=600');
+
+        // Monta um HTML só para o PDF, forçando o tamanho A4 e as cores exatas
+        janelaImpressao.document.write(`
+            <html>
+                <head>
+                    <title>Fatura_${cliente.replace(/\s+/g, '_')}</title>
+                    <style>
+                        /* Remove os cabeçalhos/rodapés feios do navegador (Data, URL, etc) */
+                        @page { size: A4; margin: 0; }
+
+                        /* Configura a folha pra caber 100% do conteúdo */
+                        body {
+                            font-family: Arial, sans-serif;
+                            color: #333;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                            margin: 15mm; /* Colocamos a margem aqui pra não vazar */
+                            box-sizing: border-box;
+                        }
+
+                        /* Força a tabela a nunca estourar a tela */
+                        table { width: 100%; max-width: 100%; table-layout: fixed; }
+                        td, th { word-wrap: break-word; }
+                    </style>
+                </head>
+                <body>
+                    ${conteudoFatura}
+                </body>
+            </html>
+        `);
+
+        janelaImpressao.document.close();
+        janelaImpressao.focus();
+
+        // Espera meio segundo para o navegador montar a tela e aciona a "Impressora"
+        setTimeout(function() {
+            janelaImpressao.print();
+            janelaImpressao.close(); // Fecha a janela fantasma depois de gerar
+        }, 500);
+    });
+
 </script>
 
 </body>

@@ -21,6 +21,10 @@ public class UsuarioController {
     public String listarUsuarios(Model model) {
         // Manda a lista de todos pro HTML
         model.addAttribute("usuarios", repository.findAll());
+
+        // AQUI TÁ A CHAVE QUE LIGA A LUZ DO BOTÃO NO MENU!
+        model.addAttribute("currentUri", "/usuarios");
+
         return "usuarios";
     }
 
@@ -39,8 +43,10 @@ public class UsuarioController {
         return "redirect:/usuarios";
     }
     @GetMapping("/perfil")
-    public String meuPerfil() {
-        // Como o GlobalAdvice já manda o "usuarioLogado" pra tela, não precisamos buscar nada no banco aqui!
+    public String meuPerfil(Model model) {
+        // Acende o botão de configurações no menu lateral
+        model.addAttribute("currentUri", "/configuracoes");
+
         return "perfil";
     }
 }
