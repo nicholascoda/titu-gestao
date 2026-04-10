@@ -2,7 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/geral :: head}"></head>
 
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini layout-fixed">
+<script>
+    if (localStorage.getItem('menuFechado') === 'true') {
+        document.body.classList.add('sidebar-collapse');
+    }
+</script>
+
 <div class="wrapper">
 
     <nav th:replace="~{fragments/geral :: navbar}"></nav>
@@ -29,6 +35,17 @@
         <section class="content">
             <div class="container-fluid">
 
+                <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible shadow-sm">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-check"></i> Sucesso!</h5>
+                    <span th:text="${mensagemSucesso}"></span>
+                </div>
+                <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible shadow-sm">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-ban"></i> Atenção!</h5>
+                    <span th:text="${mensagemErro}"></span>
+                </div>
+
                 <div class="row">
 
                     <div class="col-lg-3 col-6">
@@ -49,8 +66,7 @@
                                 <p>Receita Confirmada</p>
                             </div>
                             <div class="icon"><i class="fas fa-wallet"></i></div>
-                            <a href="/titulos?filtro=pagos" class="small-box-footer">Ver Detalhes <i class="fas fa-arrow-circle-right"></i></a>
-                        </div>
+                            <a th:href="@{/titulos(filtro='pagos', mes=${mesSelecionado})}" class="small-box-footer">Ver Detalhes <i class="fas fa-arrow-circle-right"></i></a>                        </div>
                     </div>
 
                     <div class="col-lg-3 col-6">
@@ -60,8 +76,7 @@
                                 <p>A Receber (Pendente)</p>
                             </div>
                             <div class="icon"><i class="fas fa-clock"></i></div>
-                            <a href="/titulos?filtro=pendentes" class="small-box-footer">Ver Detalhes <i class="fas fa-arrow-circle-right"></i></a>
-                        </div>
+                            <a th:href="@{/titulos(filtro='pendentes', mes=${mesSelecionado})}" class="small-box-footer">Ver Detalhes <i class="fas fa-arrow-circle-right"></i></a>                        </div>
                     </div>
 
                     <div class="col-lg-3 col-6">
@@ -69,10 +84,14 @@
                             <div class="inner">
                                 <h3 th:text="${qtdVencidos}">0</h3>
                                 <p>Cobranças Vencidas</p>
+
+                                <a th:if="${qtdVencidos > 0}" href="/disparar-cobrancas" class="btn btn-sm btn-light text-danger font-weight-bold" style="position: relative; z-index: 10;"
+                                   onclick="return confirm('⚠️ MODO FÚRIA ATIVADO: Isso vai disparar e-mails de cobrança para TODOS os inadimplentes do sistema agora mesmo.\n\nTem certeza que deseja abrir fogo?');">
+                                    <i class="fas fa-meteor"></i> Cobrar Atrasados
+                                </a>
                             </div>
                             <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
-                            <a href="/titulos?filtro=vencidos" class="small-box-footer">Resolver Agora <i class="fas fa-arrow-circle-right"></i></a>
-                        </div>
+                            <a th:href="@{/titulos(filtro='vencidos', mes=${mesSelecionado})}" class="small-box-footer">Resolver Agora <i class="fas fa-arrow-circle-right"></i></a>                        </div>
                     </div>
 
                 </div>
@@ -127,9 +146,9 @@
                             </ul>
                         </div>
                     </div>
-                </div> </div> ```
+                </div> </div>
 
- </div>
+            </div>
         </section>
     </div>
 

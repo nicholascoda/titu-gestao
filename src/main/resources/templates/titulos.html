@@ -148,11 +148,15 @@
                     <div class="form-group">
                         <label style="width: 100%;">
                             Cliente
-                            <a href="/clientes?novo=true" target="_blank" class="badge badge-success float-right">
-                                <i class="fas fa-plus"></i> Novo Cliente
-                            </a>
+                            <button type="button" class="badge badge-success float-right border-0" data-toggle="modal" data-target="#modal-novo-cliente-express" style="cursor: pointer;">
+                                <i class="fas fa-plus"></i> Novo Cliente Rápido
+                            </button>
+                            <button type="button" id="btn-recarregar-clientes" class="badge badge-info float-right mr-2 border-0" style="cursor: pointer;" title="Atualizar lista de clientes">
+                                <i class="fas fa-sync-alt"></i> Atualizar
+                            </button>
                         </label>
-                        <select name="clienteId" class="form-control select2" style="width: 100%;" required>
+
+                        <select id="select-cliente-novo" name="clienteId" class="form-control select2" style="width: 100%;" required>
                             <option value="">Selecione um cliente...</option>
                             <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nomeEmpresa}"></option>
                         </select>
@@ -288,6 +292,33 @@
                     <i class="fas fa-file-pdf"></i> Baixar Fatura (PDF)
                 </button>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-novo-cliente-express" style="z-index: 1060;" data-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content shadow-lg border-success">
+            <form id="form-cliente-express">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-bolt mr-2"></i>Cadastro Rápido</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nome / Empresa</label>
+                        <input type="text" id="express-nome" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input type="email" id="express-email" class="form-control form-control-sm" required>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-sm btn-success" id="btn-salvar-express">Salvar e Usar</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -760,6 +791,85 @@
             janelaImpressao.print();
             janelaImpressao.close(); // Fecha a janela fantasma depois de gerar
         }, 500);
+    });
+
+    // --- ATUALIZAR LISTA DE CLIENTES VIA AJAX SEM RECARREGAR A TELA ---
+    $('#btn-recarregar-clientes').click(function() {
+        var btn = $(this);
+        var icone = btn.find('i');
+
+        // Faz o ícone girar para dar feedback visual de "Carregando..."
+        icone.addClass('fa-spin');
+
+        // Bate na porta do seu RestController (/api/clientes)
+        $.get('/api/clientes', function(clientes) {
+            var select = $('#select-cliente-novo');
+            var valorAntigo = select.val(); // Salva o que já estava selecionado, só por garantia
+
+            select.empty(); // Limpa as opções velhas da tela
+            select.append('<option value="">Selecione um cliente...</option>');
+
+            // Loop pra injetar a nova lista que veio do banco de dados
+            clientes.forEach(function(c) {
+                select.append('<option value="' + c.id + '">' + c.nomeEmpresa + '</option>');
+            });
+
+            // Restaura a seleção antiga, se tiver
+            if(valorAntigo) {
+                select.val(valorAntigo);
+            }
+
+            // Como estamos usando a biblioteca Select2, precisamos dar um "susto" nela pra ela redesenhar a tela
+            select.trigger('change');
+
+            // Para de girar o ícone e bota verdinho pra dizer que deu certo!
+            icone.removeClass('fa-spin fa-sync-alt').addClass('fa-check');
+            setTimeout(function() {
+                icone.removeClass('fa-check').addClass('fa-sync-alt');
+            }, 2000);
+
+        }).fail(function() {
+            alert("Erro ao buscar clientes no servidor.");
+            icone.removeClass('fa-spin');
+        });
+    });
+
+    // Evita que o modal de trás perca a rolagem quando fechar o modal da frente
+    $('#modal-novo-cliente-express').on('hidden.bs.modal', function () {
+        $('body').addClass('modal-open');
+    });
+
+    // Salva o cliente e injeta na lista na mesma hora
+    $('#form-cliente-express').submit(function(e) {
+        e.preventDefault();
+        var btn = $('#btn-salvar-express');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Salvando...');
+
+        var dados = {
+            nomeEmpresa: $('#express-nome').val(),
+            email: $('#express-email').val()
+        };
+
+        $.ajax({
+            url: '/api/clientes',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dados),
+            success: function(novoCliente) {
+                $('#modal-novo-cliente-express').modal('hide');
+                btn.prop('disabled', false).html('Salvar e Usar');
+                $('#form-cliente-express')[0].reset();
+
+                // Puxa o select, adiciona o cara novo e já deixa ele selecionado!
+                var select = $('#select-cliente-novo');
+                select.append('<option value="' + novoCliente.id + '">' + novoCliente.nomeEmpresa + '</option>');
+                select.val(novoCliente.id).trigger('change');
+            },
+            error: function() {
+                alert("Erro ao salvar cliente. Verifique os dados.");
+                btn.prop('disabled', false).html('Salvar e Usar');
+            }
+        });
     });
 
 </script>

@@ -34,7 +34,7 @@ public class WebController {
     private final com.titu.core.service.ConfiguracaoService configuracaoService;
     private final com.titu.core.repository.ClienteRepository clienteRepository;
     private final com.titu.core.repository.LogDisparoRepository logDisparoRepository;
-
+    private final com.titu.core.service.AgendamentoService agendamentoService;
 
     @ModelAttribute("currentUri")
     public String getCurrentUri(HttpServletRequest request) {
@@ -58,9 +58,9 @@ public class WebController {
 
         // -------------------------------------------------------------------------
 
-        Double pendenteMes = tituloRepository.somarTotalPendentePorPeriodo(inicioDoMes, fimDoMes);
-        Double pagoMes = tituloRepository.somarTotalPagoPorPeriodo(inicioDoMes, fimDoMes);
-        Long vencidosMes = tituloRepository.contarVencidosPorPeriodo(inicioDoMes, fimDoMes);
+        java.math.BigDecimal pendenteMes = tituloRepository.somarTotalPendentePorPeriodo(inicioDoMes, fimDoMes);
+        java.math.BigDecimal pagoMes = tituloRepository.somarTotalPagoPorPeriodo(inicioDoMes, fimDoMes);
+        Long vencidosMes = tituloRepository.contarTodosVencidosAte(fimDoMes); // A FUNÇÃO NOVA AQUI!
 
         // Se o banco não achar nada no mês, ele devolve nulo para evitar dar erro na tela
         model.addAttribute("totalPendente", pendenteMes != null ? pendenteMes : 0.0);
@@ -105,17 +105,20 @@ public class WebController {
         // Redireciona limpando a URL e fechando os modais
         return "redirect:/clientes";
     }
+
     @GetMapping("/titulos")
     @Transactional
-    public String paginaTitulos(@RequestParam(required = false) String filtro, Model model) {
-        // chama o metodo com filtro
-        List<Titulo> lista = tituloService.listarComFiltro(filtro);
+    public String paginaTitulos(@RequestParam(required = false) String filtro,
+                                @RequestParam(required = false) String mes, // <-- AGORA ELE PEGA O MÊS!
+                                Model model) {
+
+        // Manda o filtro e o mês pro motor inteligente
+        List<Titulo> lista = tituloService.listarComFiltro(filtro, mes);
 
         model.addAttribute("titulos", lista);
         model.addAttribute("clientes", clienteService.listarTodos());
-
-        // Passa o filtro de volta pra tela (pra saber o que está vendo)
         model.addAttribute("filtroAtivo", filtro);
+        model.addAttribute("mesSelecionado", mes); // <-- Manda de volta pro HTML pra não perder
 
         return "titulos";
     }
@@ -278,6 +281,64 @@ public class WebController {
         redirectAttributes.addFlashAttribute("abaAtiva", "automacoes"); // Fofoca pra manter na aba certa
 
         return "redirect:/configuracoes";
+    }
+
+    // ROTA DO "BOTÃO DA FÚRIA" (Cobrar atrasados)
+    @GetMapping("/disparar-cobrancas")
+    public String dispararCobrancasAtrasadas(RedirectAttributes redirectAttributes) {
+        try {
+            // Chama o serviço que faz a varredura
+            tituloService.cobrarAtrasadosEmLote();
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Cobranças enviadas com sucesso para todos os devedores!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao disparar e-mails de cobrança.");
+        }
+        return "redirect:/"; // Volta pra página inicial (home.html)
+    }
+
+    @GetMapping("/agendamentos")
+    public String paginaAgendamentos(Model model) {
+        // Manda os clientes pro select do modal
+        model.addAttribute("clientes", clienteService.listarTodos());
+        // Manda a lista real do Banco de Dados para a tabela!
+        model.addAttribute("agendamentos", agendamentoService.listarTodos());
+        return "agendamentos";
+    }
+
+    @PostMapping("/agendamentos/salvar")
+    public String salvarAgendamento(
+            @RequestParam Long clienteId,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime dataHora,
+            @RequestParam String fusoHorario,
+            @RequestParam com.titu.core.model.TipoRecorrencia repeticao,
+            @RequestParam com.titu.core.model.TomMensagem tomMensagem,
+            @RequestParam String assunto,
+            @RequestParam String texto,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // 1. Acha o cliente no banco
+            com.titu.core.model.Cliente cliente = clienteService.buscarPorId(clienteId);
+
+            // 2. Monta o pacote pro Robô
+            com.titu.core.model.AgendamentoEmail agendamento = new com.titu.core.model.AgendamentoEmail();
+            agendamento.setCliente(cliente);
+            agendamento.setDataHoraProgramada(dataHora);
+            agendamento.setFusoHorarioDestino(fusoHorario);
+            agendamento.setRepeticao(repeticao);
+            agendamento.setTomMensagem(tomMensagem);
+            agendamento.setAssunto(assunto);
+            agendamento.setTexto(texto);
+
+            // 3. Entrega na mão do Service pra ele botar na fila
+            agendamentoService.agendarNovo(agendamento);
+
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Follow-up agendado com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao agendar e-mail: " + e.getMessage());
+        }
+
+        return "redirect:/agendamentos";
     }
 
 

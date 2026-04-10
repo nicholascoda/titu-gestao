@@ -19,6 +19,7 @@ public class TituloService {
     private final TituloRepository tituloRepository;
     private final ClienteService clienteService;
     private final LogAcaoService logService;
+    private final EmailService emailService;
 
     @Transactional
     public void salvar(Titulo tituloForm, Long clienteId, String tipoCobranca, java.math.BigDecimal valorInformado, Integer quantidade) {
@@ -110,16 +111,53 @@ public class TituloService {
                 .orElseThrow(() -> new IllegalArgumentException("Título não encontrado com ID: " + id));
     }
 
-    public List<Titulo> listarComFiltro(String filtro) {
-        if ("pagos".equals(filtro)) {
-            return tituloRepository.findAllByStatus(StatusTitulo.PAGO);
-        } else if ("pendentes".equals(filtro)) {
-            return tituloRepository.findAllByStatus(StatusTitulo.PENDENTE);
-        } else if ("vencidos".equals(filtro)) {
-            return tituloRepository.findVencidos();
-        } else {
+    public List<Titulo> listarComFiltro(String filtro, String mes) {
+        // Se a pessoa clicou no menu normal (sem mês), mantém o comportamento padrão
+        if (mes == null || mes.trim().isEmpty()) {
+            if ("pagos".equals(filtro)) return tituloRepository.findAllByStatus(StatusTitulo.PAGO);
+            if ("pendentes".equals(filtro)) return tituloRepository.findAllByStatus(StatusTitulo.PENDENTE);
+            if ("vencidos".equals(filtro)) return tituloRepository.findVencidos();
             return tituloRepository.findAllComCliente();
         }
+
+        // Se veio do Dashboard (tem "?mes=" na URL), o Service fatia a data!
+        java.time.YearMonth anoMes = java.time.YearMonth.parse(mes);
+        LocalDate inicio = anoMes.atDay(1);
+        LocalDate fim = anoMes.atEndOfMonth();
+
+        if ("pagos".equals(filtro)) return tituloRepository.findAllByStatusAndPeriodo(StatusTitulo.PAGO, inicio, fim);
+        if ("pendentes".equals(filtro)) return tituloRepository.findAllByStatusAndPeriodo(StatusTitulo.PENDENTE, inicio, fim);
+        if ("vencidos".equals(filtro)) return tituloRepository.findVencidosPorPeriodo(inicio, fim);
+
+        return tituloRepository.findAllComCliente();
+    }
+    public void cobrarAtrasadosEmLote() {
+        // 1. Busca tod mundo que tá devendo (vencidos)
+        List<Titulo> vencidos = tituloRepository.findVencidos();
+        int disparos = 0;
+
+        // 2. Passa o rodo e manda o e-mail um por um
+        for (Titulo titulo : vencidos) {
+            Cliente cliente = titulo.getCliente();
+            if (cliente != null && cliente.getEmail() != null && !cliente.getEmail().isEmpty()) {
+                String assunto = "Aviso de Atraso - Titu Gestão";
+                String texto = "Olá, " + cliente.getNomeEmpresa() + ".\n\n" +
+                        "Identificamos que a cobrança '" + titulo.getDescricao() +
+                        "' no valor de R$ " + titulo.getValorOriginal() +
+                        " (vencida em " + titulo.getDataVencimento() + ") encontra-se em atraso.\n\n" +
+                        "Por favor, regularize sua situação para evitar bloqueios.\n\n" +
+                        "Atenciosamente, Equipe Titu.";
+
+                // Dispara a bala!
+                // (Aqui eu uso o emailService que a gente vai injetar nesse arquivo)
+                // OBS: O código abaixo vai dar erro até fazermos o passo 1.1 ali embaixo.
+                emailService.enviarEmailSimples(cliente.getEmail(), assunto, texto);
+                disparos++;
+            }
+        }
+
+        // 3. Registra a carnificina no Log de Ações para a gente poder auditar depois
+        logService.registrarAcao("COBRANCA_LOTE", "Disparados " + disparos + " e-mails de cobrança para devedores.");
     }
 
     public List<Titulo> listarPorCliente(Long clienteId) {

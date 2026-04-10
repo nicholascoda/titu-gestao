@@ -48,13 +48,17 @@ public interface TituloRepository extends JpaRepository<Titulo, Long> {
     @Query("SELECT t FROM Titulo t WHERE t.cliente.id = :clienteId ORDER BY t.status DESC, t.dataVencimento DESC")
     List<Titulo> buscarPorCliente(Long clienteId);
 
-    // Soma tudo que está PENDENTE dentro do mês escolhido
-    @Query("SELECT SUM(t.valorOriginal) FROM Titulo t WHERE t.status = 'PENDENTE' AND t.dataVencimento BETWEEN :inicio AND :fim")
-    Double somarTotalPendentePorPeriodo(@Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
+    // 1. Soma tudo que está PENDENTE dentro do mês escolhido
+    @Query("SELECT COALESCE(SUM(t.valorOriginal), 0) FROM Titulo t WHERE t.status = com.titu.core.model.StatusTitulo.PENDENTE AND t.dataVencimento BETWEEN :inicio AND :fim")
+    java.math.BigDecimal somarTotalPendentePorPeriodo(@Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
 
-    // Soma tudo que está PAGO dentro do mês escolhido
-    @Query("SELECT SUM(t.valorOriginal) FROM Titulo t WHERE t.status = 'PAGO' AND t.dataVencimento BETWEEN :inicio AND :fim")
-    Double somarTotalPagoPorPeriodo(@Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
+    // 2. Soma tudo que está PAGO dentro do mês escolhido
+    @Query("SELECT COALESCE(SUM(t.valorOriginal), 0) FROM Titulo t WHERE t.status = com.titu.core.model.StatusTitulo.PAGO AND t.dataVencimento BETWEEN :inicio AND :fim")
+    java.math.BigDecimal somarTotalPagoPorPeriodo(@Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
+
+    // 3. (O NOVO) Conta TODOS os vencidos até o último dia do mês (mesmo que sejam de meses anteriores)
+    @Query("SELECT COUNT(t) FROM Titulo t WHERE t.status = com.titu.core.model.StatusTitulo.PENDENTE AND t.dataVencimento <= :dataLimite AND t.dataVencimento < CURRENT_DATE")
+    Long contarTodosVencidosAte(@Param("dataLimite") java.time.LocalDate dataLimite);
 
     // Conta quantos títulos venceram (data de vencimento menor que hoje) e não foram pagos dentro daquele mês
     @Query("SELECT COUNT(t) FROM Titulo t WHERE t.status = 'PENDENTE' AND t.dataVencimento BETWEEN :inicio AND :fim AND t.dataVencimento < CURRENT_DATE")
@@ -62,6 +66,12 @@ public interface TituloRepository extends JpaRepository<Titulo, Long> {
 
     // Procura todos os títulos que têm um determinado status (ex: PENDENTE) e uma data de vencimento específica
     List<Titulo> findByStatusAndDataVencimento(com.titu.core.model.StatusTitulo status, java.time.LocalDate dataVencimento);
+
+    @Query("SELECT t FROM Titulo t JOIN FETCH t.cliente WHERE t.status = :status AND t.dataVencimento BETWEEN :inicio AND :fim")
+    List<Titulo> findAllByStatusAndPeriodo(@Param("status") StatusTitulo status, @Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
+
+    @Query("SELECT t FROM Titulo t JOIN FETCH t.cliente WHERE t.status = com.titu.core.model.StatusTitulo.PENDENTE AND t.dataVencimento BETWEEN :inicio AND :fim AND t.dataVencimento < CURRENT_DATE")
+    List<Titulo> findVencidosPorPeriodo(@Param("inicio") java.time.LocalDate inicio, @Param("fim") java.time.LocalDate fim);
 
 
 }

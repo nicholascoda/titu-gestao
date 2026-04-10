@@ -55,7 +55,15 @@
     </style>
 </head>
 
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini layout-fixed">
+
+<script>
+    if (localStorage.getItem('menuFechado') === 'true') {
+        document.body.classList.add('sidebar-collapse');
+    }
+</script>
+
+<div class="wrapper">
 
 <nav th:fragment="navbar" class="main-header navbar navbar-expand navbar-white navbar-light">
     <ul class="navbar-nav">
@@ -70,6 +78,9 @@
         </li>
         <li class="nav-item d-none d-sm-inline-block">
             <a href="/titulos" class="nav-link" th:classappend="${currentUri != null and currentUri.startsWith('/titulos') ? 'font-weight-bold text-primary' : ''}">Títulos</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="/agendamentos" class="nav-link" th:classappend="${currentUri != null and currentUri.startsWith('/agendamentos') ? 'font-weight-bold text-primary' : ''}">Agendamentos</a>
         </li>
     </ul>
 
@@ -127,6 +138,12 @@
                     <a href="/titulos" class="nav-link" th:classappend="${currentUri != null and currentUri.startsWith('/titulos') ? 'active' : ''}">
                         <i class="nav-icon fas fa-file-invoice-dollar"></i>
                         <p>Títulos</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/agendamentos" class="nav-link" th:classappend="${currentUri != null and currentUri.startsWith('/agendamentos') ? 'active' : ''}">
+                        <i class="nav-icon fas fa-calendar-check"></i>
+                        <p>Agendamentos</p>
                     </a>
                 </li>
 
@@ -245,8 +262,23 @@
                     }
                 };
             $('.mask-telefone').mask(SPMaskBehavior, spOptions);
+
+            // Blinda o menu contra o Javascript fofoqueiro do AdminLTE
+            if (localStorage.getItem('menuFechado') === 'true') {
+                $('body').addClass('sidebar-collapse');
+            }
+        });
+        // --- GRAVADOR DE ESTADO DO MENU LATERAL ---
+        // Ouve os eventos nativos do AdminLTE quando clica no botão "sanduíche"
+        $(document).on('collapsed.lte.pushmenu', function() {
+            localStorage.setItem('menuFechado', 'true');
+        });
+
+        $(document).on('shown.lte.pushmenu', function() {
+            localStorage.setItem('menuFechado', 'false');
         });
     </script>
+</div>
 </div>
 </body>
 </html>
