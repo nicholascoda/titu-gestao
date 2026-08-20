@@ -1,4 +1,9 @@
 # 💸 Titu - Sistema de Gestão e Conciliação Financeira
+Acesse o site para testar o sistema:
+https://tituapp.duckdns.org/
+Solicite o login.
+
+Upado no Oracle Cloud
 
 ## 🎯 O Projeto
 O Titu é uma plataforma backend desenvolvida para automatizar a gestão de cobranças, e controle de inadimplência, com gráficos para facilitar a visualização. Criado com foco na resiliência da regra de negócio, o sistema calcula saldos devedores, gerencia múltiplos pagadores e transações pendentes.
